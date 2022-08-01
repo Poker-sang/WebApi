@@ -39,8 +39,8 @@ public class Conv2dDw : Sequential
         AddRange(
             new Conv2d(-1, 3) { Stride = Stride, Padding = 1, Groups = -1, Bias = false },
             new BatchNorm2d(),
-            new ReLU(),
-            new Conv2d(outputChannels, 1) { Stride = 1, Padding = 0, Bias = false },
+            new ReLU { InPlace = true },
+            new Conv2d(outputChannels, 1) { Bias = false },
             new BatchNorm2d(),
-            new ReLU());
+            new ReLU { InPlace = true });
 }

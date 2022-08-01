@@ -11,7 +11,7 @@ public class MobileNet : Net
         Layers = new Sequential(new InputLayer(3))
         {
             new Conv2d(32, 3) { Stride = 2, Padding = 1 },
-            new BatchNorm2d(), 
+            new BatchNorm2d(),
             new ReLU(),
             new Conv2dDw(64),
             new Conv2dDw(128) { Stride = 2 },

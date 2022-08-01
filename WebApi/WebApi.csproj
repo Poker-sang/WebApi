@@ -1,5 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+    <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <TypeScriptTarget>ESNext</TypeScriptTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <TypeScriptTarget>ESNext</TypeScriptTarget>
+    </PropertyGroup>
+
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -9,12 +17,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.7">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
         <PackageReference Include="TorchSharp-cpu" Version="0.97.0" />
     </ItemGroup>
 

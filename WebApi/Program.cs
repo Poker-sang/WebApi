@@ -1,12 +1,11 @@
-using TorchSharp;
-using WebApi.TorchUtilities.Layers;
-using WebApi.TorchUtilities.Sequences;
-using WebApi.TorchUtilities.Services;
+using WebApi;
+using WebApi.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+App.Database = new CnnTestContext(builder.Configuration["ConnectionStrings:SqlServer"] + ";MultipleActiveResultSets=true");
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

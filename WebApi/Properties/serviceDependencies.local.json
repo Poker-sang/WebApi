@@ -7,7 +7,7 @@
       "secretStore": "LocalSecretsFile",
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/poker-server/databases/CnnTest",
       "type": "mssql.azure",
-      "connectionId": "MyConnectionStrings",
+      "connectionId": "ConnectionStrings__SqlServer",
       "dynamicId": null
     }
   }

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using WebApi.TorchUtilities.Misc;
 using WebApi.TorchUtilities.Sequences;
 
 namespace WebApi.TorchUtilities.Services;
@@ -14,8 +13,7 @@ public static class Kernel
             t => t.GetProperties().Where(p => p.GetCustomAttribute<JsonIgnoreAttribute>() is null));
 
     public static JsonArray GetJson(this Sequential sequential)
-    {
-        return new(sequential
+        => new(sequential
             .Select(module =>
             {
                 var name = module.GetType().Name;
@@ -28,5 +26,4 @@ public static class Kernel
                     };
             })
             .ToArray());
-    }
 }
