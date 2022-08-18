@@ -6,7 +6,7 @@ namespace WebApi.TorchUtilities.Layers;
 
 public abstract class Module
 {
-    [JsonIgnore] 
+    [JsonIgnore]
     public virtual Module Last { get; set; } = null!;
 
     [JsonIgnore]

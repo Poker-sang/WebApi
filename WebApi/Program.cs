@@ -1,9 +1,8 @@
 using WebApi;
-using WebApi.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
-App.Database = new CnnTestContext(builder.Configuration["ConnectionStrings:SqlServer"] + ";MultipleActiveResultSets=true");
+App.Database = new(builder.Configuration["ConnectionStrings:SqlServer"] + ";MultipleActiveResultSets=true");
 
 // Add services to the container.
 builder.Services.AddControllers();

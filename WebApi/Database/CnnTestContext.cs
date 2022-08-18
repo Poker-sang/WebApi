@@ -2,12 +2,12 @@
 
 namespace WebApi.Database;
 
-public partial class CnnTestContext : DbContext
+public class CnnDatabaseContext : DbContext
 {
     private readonly string _connectionString;
-    public CnnTestContext(string connectionString) => _connectionString = connectionString;
+    public CnnDatabaseContext(string connectionString) => _connectionString = connectionString;
 
-    public CnnTestContext(string connectionString, DbContextOptions<CnnTestContext> options)
+    public CnnDatabaseContext(string connectionString, DbContextOptions<CnnDatabaseContext> options)
         : base(options)
         => _connectionString = connectionString;
 
@@ -24,12 +24,14 @@ public partial class CnnTestContext : DbContext
         {
             _ = entity.HasKey(e => e.Name);
 
-            _ = entity.ToTable("Sequential");
+            _ = entity.ToTable("CnnTable");
 
             _ = entity.Property(e => e.Name)
                 .HasMaxLength(32)
                 .IsUnicode(false);
 
+            _ = entity.Property(e => e.ParamsJson).IsUnicode(false);
+            
             _ = entity.Property(e => e.ContentJson).IsUnicode(false);
 
             _ = entity.Property(e => e.CreateTime).HasColumnType("date");
