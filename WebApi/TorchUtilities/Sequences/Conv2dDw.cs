@@ -5,7 +5,6 @@ using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Sequences;
 
-[JsonPropertyIgnore(nameof(OutputChannels), nameof(Stride))]
 public class Conv2dDw : Sequential
 {
     private Rect _stride;

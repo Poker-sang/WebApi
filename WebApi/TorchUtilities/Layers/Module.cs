@@ -1,15 +1,14 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using TorchSharp;
+﻿using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
 
 namespace WebApi.TorchUtilities.Layers;
 
 public abstract class Module
 {
-    [JsonIgnore]
+    [DeserializerIgnore]
     public virtual Module Last { get; set; } = null!;
 
-    [JsonIgnore]
+    [DeserializerIgnore]
     public virtual long InputChannels
     {
         get => Last.OutputChannels;

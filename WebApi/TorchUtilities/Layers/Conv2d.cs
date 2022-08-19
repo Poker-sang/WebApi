@@ -1,12 +1,18 @@
-﻿using System.Security.Cryptography;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
+using WebApi.TorchUtilities.Interfaces;
 using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Layers;
 
-public class Conv2d : Module
+[Deserializer]
+public partial class Conv2d : Module
 {
+    private Conv2d() { }
+
     public Conv2d(long outputChannel, Rect kernelSize)
     {
         OutputChannels = outputChannel;

@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <TypeScriptTarget>ESNext</TypeScriptTarget>
+        <TypeScriptTarget>ESNext</TypeScriptTarget>
     </PropertyGroup>
 
     <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <TypeScriptTarget>ESNext</TypeScriptTarget>
+        <TypeScriptTarget>ESNext</TypeScriptTarget>
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>preview</LangVersion>
@@ -18,13 +18,13 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.8" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
         <PackageReference Include="TorchSharp-cpu" Version="0.97.2" />
@@ -32,8 +32,11 @@
 
     <ItemGroup>
         <Folder Include="TorchUtilities\Models\" />
-        <Folder Include="TorchUtilities\Attributes\" />
         <Folder Include="TorchUtilities\Services\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\WebApi.SourceGenerator\WebApi.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>

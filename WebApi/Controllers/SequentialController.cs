@@ -11,8 +11,8 @@ namespace WebApi.Controllers;
 public class SequentialController : ControllerBase
 {
     [HttpPost("All")]
-    public JsonArray All()
-        => new(App.Database.SequentialRecord.ToArray()
+    public JsonArray All() =>
+        new(App.Database.SequentialRecord.ToArray()
             .Select((s, index)
                 => (JsonNode)new JsonObject
                 {
@@ -24,9 +24,11 @@ public class SequentialController : ControllerBase
                     [s.Remark.CamelName()] = s.Remark
                 }).ToArray());
 
+    #region Find
+
     [HttpPost("Find")]
-    public JsonObject? Find(string name) =>
-        App.Database.SequentialRecord.Find(name) is not { } s
+    public JsonObject? Find(string sequentialName) =>
+        sequentialName.FindSequential() is not { } s
             ? null
             : new JsonObject
             {
@@ -39,7 +41,7 @@ public class SequentialController : ControllerBase
 
     [HttpPost("Find/Property")]
     public dynamic? FindProperty(string sequentialName, string propertyName) =>
-        App.Database.SequentialRecord.Find(sequentialName) is not { } s
+        sequentialName.FindSequential() is not { } s
             ? null
             : propertyName switch
             {
@@ -51,9 +53,26 @@ public class SequentialController : ControllerBase
                 _ => null
             };
 
-    [HttpPost("Layers/All")]
-    public JsonArray LayersAll(string sequentialName) =>
-        App.Database.SequentialRecord.Find(sequentialName) is not { } s
+    #endregion
+
+    [HttpPost("Params")]
+    public JsonArray Params(string sequentialName) =>
+        sequentialName.FindSequential() is not { } s
+            ? new()
+            : new(JsonDocument.Parse(s.ParamsJson).RootElement.EnumerateArray()
+                .Select((je, index) =>
+                    (JsonNode)new JsonObject
+                    {
+                        ["key"] = index,
+                        ["name"] = je.GetProperty("Name").GetString(),
+                        ["type"] = je.GetProperty("Type").GetString()
+                    }).ToArray());
+
+    #region Layers
+
+    [HttpPost("Layers")]
+    public JsonArray Layers(string sequentialName) =>
+        sequentialName.FindSequential() is not { } s
             ? new()
             : new(JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray()
                 .Select((je, index) =>
@@ -62,17 +81,35 @@ public class SequentialController : ControllerBase
                     return (JsonNode)new JsonObject
                     {
                         ["key"] = index,
-                        ["type"] = name.GetLayerType(),
                         ["name"] = name,
+                        ["type"] = name.GetLayerType(),
+                        ["containsParams"] = je.GetOptParams(),
                         [nameof(Module.OutputChannels).ToCamel()] = je.GetDynamicProperty(nameof(Module.OutputChannels)),
                         [nameof(Conv2d.KernelSize).ToCamel()] = je.GetDynamicProperty(nameof(Conv2d.KernelSize)),
                         [nameof(Conv2d.Stride).ToCamel()] = je.GetDynamicProperty(nameof(Conv2d.Stride))
                     };
                 }).ToArray());
 
-    #region Find
+    [HttpPost("Layers/Edit")]
+    public JsonObject? LayersEdit(string sequentialName, int index)
+    {
+        if (sequentialName.FindSequential() is not { } s)
+            return null;
 
+        var arr = JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray().ToArray();
+        if (arr.Length <= index)
+            return null;
 
+        var layer = arr[index];
+        switch (layer.GetProperty("Name").GetString()!)
+        {
+            case nameof(Conv2d):
+                //return Conv2d.Deserialize(layer);.ToJson();
+                break;
+        }
+
+        return null;
+    }
 
     #endregion
 
