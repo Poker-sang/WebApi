@@ -91,7 +91,7 @@ public class SequentialController : ControllerBase
                 }).ToArray());
 
     [HttpPost("Layers/Edit")]
-    public JsonObject? LayersEdit(string sequentialName, int index)
+    public JsonArray? LayersEdit(string sequentialName, int index)
     {
         if (sequentialName.FindSequential() is not { } s)
             return null;

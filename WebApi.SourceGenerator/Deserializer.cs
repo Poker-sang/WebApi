@@ -32,16 +32,14 @@ partial class {name} : IDeserialize<{name}>
     {{
         var result = new {name}();
         foreach (var jp in jsonElement.EnumerateObject())
-        {{
             switch (jp.Name)
             {{
 ");
         var deserializeEndAndToJsonBegin = new StringBuilder(@$"{Spacing(3)}}}
-        }}
         return result;
     }}
 
-    public JsonObject ToJson() =>
+    public JsonArray ToJson() =>
         new()
         {{
 ");
@@ -62,7 +60,7 @@ partial class {name} : IDeserialize<{name}>
             namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
             var declaration = dict[property.Name];
             _ = classBeginAndDeserializeBegin.AppendLine(PropertyDeserialize(property, declaration));
-            _ = deserializeEndAndToJsonBegin.AppendLine(PropertyToJson(property, declaration));
+            _ = deserializeEndAndToJsonBegin.AppendLine(PropertyToJson(property));
         }
 
         deserializeEndAndToJsonBegin = deserializeEndAndToJsonBegin.Remove(deserializeEndAndToJsonBegin.Length - 3, 3);
@@ -100,7 +98,7 @@ partial class {name} : IDeserialize<{name}>
         ["Padding"] = "Padding"
     };
 
-    private static string PropertyToJson(IPropertySymbol property, PropertyDeclarationSyntax declaration)
-        => $@"{Spacing(3)}[nameof({property.Name})] = {property.Name}.ToJson(),";
+    private static string PropertyToJson(IPropertySymbol property)
+        => $@"{Spacing(3)}{property.Name}.ToJson(nameof({property.Name})),";
 
 }

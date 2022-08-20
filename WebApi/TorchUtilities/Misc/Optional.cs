@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using WebApi.TorchUtilities.Services;
 
@@ -39,21 +40,41 @@ public struct Optional<T>
                 _ => throw new NotSupportedException()
             }));
 
-    public JsonNode ToJson()
+    public JsonObject ToJson(string callerName)
     {
         if (Binding.HasValue)
-            return JsonValue.Create(Binding.Value is -1 ? "*" : $"${Binding.Value}")!;
+            return new()
+            {
+                ["name"] = callerName,
+                ["type"] = nameof(Binding),
+                ["value"] = Binding.Value is -1 ? "*" : $"${Binding.Value}"
+            };
         switch (0)
         {
             case 0 when typeof(T).IsPrimitive:
             case 0 when typeof(T).IsEnum:
-                return JsonValue.Create(_value)!;
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = typeof(T).Name,
+                    ["value"] = JsonValue.Create(_value)
+                };
             case 0 when typeof(T) == typeof(Rect):
                 var r = (_value as Rect?)!.Value;
-                return new JsonArray(r.Item1, r.Item2);
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = nameof(Rect),
+                    ["value"] = new JsonArray(r.Item1, r.Item2)
+                };
             case 0 when typeof(T) == typeof(PaddingType):
                 var p = (_value as PaddingType?)!.Value;
-                return p.ToJson();
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = nameof(PaddingType),
+                    ["value"] = p.ToJson()
+                }; 
             default:
                 throw new NotSupportedException();
 
