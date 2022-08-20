@@ -1,17 +1,20 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using TorchSharp;
+﻿using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
+using WebApi.TorchUtilities.Interfaces;
+using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Layers;
 
-public class Linear : Module
+[Deserializer]
+public partial class Linear : Module, IDeserialize<Linear>
 {
-    public long InputSize { get; set; }
-    public long OutputSize { get; set; }
-    public bool Bias { get; set; } = true;
-    [JsonIgnore]
+    private Linear() { }
+    public Optional<long> InputSize { get; set; }
+    public Optional<long> OutputSize { get; set; }
+    public Optional<bool> Bias { get; set; } = true;
+    [DeserializerIgnore]
     public sealed override long InputChannels => 1;
-    public sealed override long OutputChannels => 1;
+    public sealed override Optional<long> OutputChannels => 1;
 
     public Linear(long inputSize, long outputSize)
     {

@@ -99,16 +99,16 @@ public class SequentialController : ControllerBase
         var arr = JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray().ToArray();
         if (arr.Length <= index)
             return null;
-
         var layer = arr[index];
-        switch (layer.GetProperty("Name").GetString()!)
+        return layer.GetProperty("Name").GetString()! switch
         {
-            case nameof(Conv2d):
-                //return Conv2d.Deserialize(layer);.ToJson();
-                break;
-        }
-
-        return null;
+            nameof(Conv2d) => Conv2d.Deserialize(layer).ToJson(),
+            nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToJson(),
+            nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToJson(),
+            nameof(Linear) => Linear.Deserialize(layer).ToJson(),
+            nameof(ReLU) => ReLU.Deserialize(layer).ToJson(),
+            _ => null
+        };
     }
 
     #endregion

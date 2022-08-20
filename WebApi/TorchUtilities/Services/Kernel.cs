@@ -9,6 +9,7 @@ namespace WebApi.TorchUtilities.Services;
 public static class Kernel
 {
     public static Rect GetRect(this JsonElement je) => new(je[0].GetInt64(), je[1].GetInt64());
+    public static PaddingType GetPadding(this JsonElement je) => je.ValueKind is JsonValueKind.Array ? je.GetRect() : je.GetUInt16();
 
     public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
             t.IsSubclassOf(typeof(Module)) && !t.IsSubclassOf(typeof(Sequential)))
@@ -30,15 +31,25 @@ public static class Kernel
                 _ => result.GetString()
             };
 
+    public static bool TrySplitOptParam(this JsonElement je, out int v)
+    {
+        v = 0;
+        if (je is not { ValueKind: JsonValueKind.String }
+            || je.GetString() is not { } str)
+            return false;
+        if (str is "*")
+            v = -1;
+        else if (int.TryParse(str[1..], out var rst))
+            v = rst;
+        return true;
+    }
+
     public static JsonArray? GetOptParams(this JsonElement je)
     {
         var result = new SortedSet<int>();
         foreach (var jsonProperty in je.EnumerateObject())
-        {
-            if (jsonProperty.Value is { ValueKind: JsonValueKind.String } value
-                && int.TryParse(value.GetString()?[1..], out var rst))
+            if (jsonProperty.Value.TrySplitOptParam(out var rst))
                 _ = result.Add(rst);
-        }
 
         if (result.Count is 0)
             return null;

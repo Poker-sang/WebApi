@@ -1,16 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
+﻿global using Rect = System.ValueTuple<long, long>;
 
-namespace WebApi.TorchUtilities.Misc;
-
-public struct Rect
+/*
+public struct Rect : Tuple<int,int>
 {
-    public (long, long) Value { get; set; }
+    public long Value1 { get; set; }
+    public long Value2 { get; set; }
 
-    public Rect(long v) => Value = (v, v);
-    public Rect((long, long) v) => Value = v;
-    public Rect(long v1, long v2) => Value = (v1, v2);
+    public Rect(long v) => Value1 = Value2 = v;
+    public Rect((long, long) v) => Value1 = v;
+    public Rect(long v1, long v2)
+    {
+        Value1 = v1;
+        Value2 = v2;
+    }
 
     public static implicit operator Rect(long v) => new(v);
     public static implicit operator Rect((long, long) v) => new(v);
@@ -32,4 +34,9 @@ public struct Rect
         result = default;
         return false;
     }
+
+    public object? this[int index] => throw new NotImplementedException();
+
+    public int Length { get; }
 }
+*/

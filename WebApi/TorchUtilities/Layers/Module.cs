@@ -1,5 +1,6 @@
 ﻿using TorchSharp;
 using WebApi.TorchUtilities.Attributes;
+using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Layers;
 
@@ -9,13 +10,14 @@ public abstract class Module
     public virtual Module Last { get; set; } = null!;
 
     [DeserializerIgnore]
+    // TODO
     public virtual long InputChannels
     {
-        get => Last.OutputChannels;
+        get => Last.OutputChannels.TryGetValue;
         set => Last.OutputChannels = value;
     }
 
-    public virtual long OutputChannels { get; set; }
+    public virtual Optional<long> OutputChannels { get; set; }
 
     public abstract torch.nn.Module ToTorch();
 }

@@ -1,7 +1,8 @@
 ﻿using System.Collections;
-using System.Text.Json.Serialization;
 using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
 using WebApi.TorchUtilities.Layers;
+using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Sequences;
 
@@ -11,7 +12,7 @@ public class Sequential : Module, IEnumerable<Module>
     public IEnumerator<Module> GetEnumerator() => Modules.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    [JsonIgnore]
+    [DeserializerIgnore]
     public override Module Last
     {
         get => _last;
@@ -23,14 +24,14 @@ public class Sequential : Module, IEnumerable<Module>
         }
     }
 
-    [JsonIgnore]
+    [DeserializerIgnore]
     public override long InputChannels
     {
         get => Modules is { Count: not 0 } ? Modules[0].InputChannels : -1;
         set => Modules[0].InputChannels = Modules is { Count: not 0 } ? value : throw new NotSupportedException();
     }
 
-    public sealed override long OutputChannels
+    public sealed override Optional<long> OutputChannels
     {
         get => Modules is { Count: not 0 } ? Modules[^1].OutputChannels : InputChannels;
         set
@@ -42,9 +43,9 @@ public class Sequential : Module, IEnumerable<Module>
         }
     }
 
-    [JsonIgnore]
+    [DeserializerIgnore]
     public List<Module> Modules { get; } = new();
-    [JsonIgnore]
+    [DeserializerIgnore]
     public IEnumerable<Module> ModulesOutput => Modules.Where(t => t is not InputLayer);
 
     public Sequential(Module last = null!) => _last = last;

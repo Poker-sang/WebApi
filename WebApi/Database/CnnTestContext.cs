@@ -31,7 +31,7 @@ public class CnnDatabaseContext : DbContext
                 .IsUnicode(false);
 
             _ = entity.Property(e => e.ParamsJson).IsUnicode(false);
-            
+
             _ = entity.Property(e => e.ContentJson).IsUnicode(false);
 
             _ = entity.Property(e => e.CreateTime).HasColumnType("date");

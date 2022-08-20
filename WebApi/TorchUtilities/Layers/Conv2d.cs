@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using TorchSharp;
+﻿using TorchSharp;
 using WebApi.TorchUtilities.Attributes;
 using WebApi.TorchUtilities.Interfaces;
 using WebApi.TorchUtilities.Misc;
@@ -9,7 +6,7 @@ using WebApi.TorchUtilities.Misc;
 namespace WebApi.TorchUtilities.Layers;
 
 [Deserializer]
-public partial class Conv2d : Module
+public partial class Conv2d : Module, IDeserialize<Conv2d>
 {
     private Conv2d() { }
 
@@ -19,20 +16,19 @@ public partial class Conv2d : Module
         KernelSize = kernelSize;
     }
 
-    public sealed override long OutputChannels { get; set; }
-    public Rect KernelSize { get; set; }
-    public Rect Stride { get; set; } = 1;
-    public Rect Padding { get; set; } = 0;
-    public Padding? PaddingType { get; set; }
-    public Rect Dilation { get; set; } = 1;
-    public PaddingModes PaddingMode { get; set; } = PaddingModes.Zeros;
-    public long Groups { get; set; } = 1;
-    public bool Bias { get; set; } = true;
+    public sealed override Optional<long> OutputChannels { get; set; }
+    public Optional<Rect> KernelSize { get; set; }
+    public Optional<Rect> Stride { get; set; } = (1, 1);
+    public Optional<PaddingType> Padding { get; set; } = new PaddingType();
+    public Optional<Rect> Dilation { get; set; } = (1, 1);
+    public Optional<PaddingModes> PaddingMode { get; set; } = PaddingModes.Zeros;
+    public Optional<long> Groups { get; set; } = 1;
+    public Optional<bool> Bias { get; set; } = true;
 
     public override torch.nn.Module ToTorch() =>
-        PaddingType is { } paddingType
+        ((PaddingType)Padding).GetPadding() is { } paddingType
             ? torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, paddingType, Stride, Dilation, PaddingMode,
                 Groups, Bias)
-            : torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, Stride, Padding, Dilation, PaddingMode,
+            : torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, Stride, ((PaddingType)Padding).GetRect(), Dilation, PaddingMode,
                 Groups, Bias);
 }

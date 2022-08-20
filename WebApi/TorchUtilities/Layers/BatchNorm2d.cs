@@ -1,28 +1,31 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using TorchSharp;
+﻿using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
+using WebApi.TorchUtilities.Interfaces;
+using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Layers;
 
-public class BatchNorm2d : Module
+[Deserializer]
+public partial class BatchNorm2d : Module, IDeserialize<BatchNorm2d>
 {
-    public long Feature
+    [DeserializerIgnore]
+    public Optional<long> Feature
     {
         get => InputChannels;
         set => InputChannels = value;
     }
 
-    [JsonIgnore]
-    public override long OutputChannels
+    [DeserializerIgnore]
+    public override Optional<long> OutputChannels
     {
         get => InputChannels;
         set => InputChannels = value;
     }
 
-    public double Eps { get; set; } = 1e-05d;
-    public double Momentum { get; set; } = 0.1d;
-    public bool Affine { get; set; } = true;
-    public bool TrackRunningStats { get; set; } = true;
+    public Optional<double> Eps { get; set; } = 1e-05d;
+    public Optional<double> Momentum { get; set; } = 0.1d;
+    public Optional<bool> Affine { get; set; } = true;
+    public Optional<bool> TrackRunningStats { get; set; } = true;
 
     public override torch.nn.Module ToTorch() => torch.nn.BatchNorm2d(Feature, Eps, Momentum, Affine, TrackRunningStats);
 }

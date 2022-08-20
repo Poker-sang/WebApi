@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using WebApi.TorchUtilities.Attributes;
 using WebApi.TorchUtilities.Layers;
 using WebApi.TorchUtilities.Misc;
 
@@ -36,10 +35,10 @@ public class Conv2dDw : Sequential
 
     public Conv2dDw(long outputChannels) =>
         AddRange(
-            new Conv2d(-1, 3) { Stride = Stride, Padding = 1, Groups = -1, Bias = false },
+            new Conv2d(-1, (3, 3)) { Stride = Stride, Padding = (PaddingType)(1, 1), Groups = -1, Bias = false },
             new BatchNorm2d(),
             new ReLU { InPlace = true },
-            new Conv2d(outputChannels, 1) { Bias = false },
+            new Conv2d(outputChannels, (1, 1)) { Bias = false },
             new BatchNorm2d(),
             new ReLU { InPlace = true });
 }

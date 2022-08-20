@@ -32,10 +32,12 @@ partial class {name} : IDeserialize<{name}>
     {{
         var result = new {name}();
         foreach (var jp in jsonElement.EnumerateObject())
+        {{
             switch (jp.Name)
             {{
 ");
         var deserializeEndAndToJsonBegin = new StringBuilder(@$"{Spacing(3)}}}
+        }}
         return result;
     }}
 
@@ -77,36 +79,8 @@ partial class {name} : IDeserialize<{name}>
         var type = declaration.Type.ToString();
         if (type.EndsWith("?"))
             type = type.Substring(0, type.Length - 1);
-        var isPrimitive = true;
-        if (PresetTypes.TryGetValue(type, out var value))
-            type = value;
-        else if (type is "bool")
-            type = nameof(Boolean);
-        else
-            isPrimitive = false;
 
-        return $"{Spacing(4)}case nameof({name}): result.{name} = {(isPrimitive
-            ? @$"jp.Value.Get{type}"
-            : @$"({type})jp.Value.GetUInt16")}(); break;";
-    }
-
-    private static string PropertyToJson(IPropertySymbol property, PropertyDeclarationSyntax declaration)
-    {
-        var init = declaration.Initializer?.Value.ToString();
-        var type = declaration.Type.ToString();
-        if (type.StartsWith(nameof(Nullable)))
-            type = type.Substring(9, type.Length - 1);
-        if (init is null)
-            if (property.Type.TypeKind is TypeKind.Struct or TypeKind.Enum)
-                if (property.NullableAnnotation is NullableAnnotation.Annotated)
-                    init = "null";
-                else
-                    init = PresetTypes.ContainsKey(type) ? "0" : property.Type.Name is nameof(Boolean) ? "false" : $"({type})0";
-            else
-                throw new NotSupportedException("It is not a struct");
-        else if (property.Type.TypeKind is TypeKind.Enum)
-            init = $"(int){init}";
-        return $@"{Spacing(3)}[nameof({property.Name})] = {init},";
+        return $"{Spacing(4)}case nameof({name}): result.{name} = {type}.FromJson(jp.Value); break;";
     }
 
     private static readonly Dictionary<string, string> PresetTypes = new()
@@ -121,6 +95,12 @@ partial class {name} : IDeserialize<{name}>
         ["ulong"] = nameof(UInt64),
         ["float"] = nameof(Single),
         ["double"] = nameof(Double),
-        ["Rect"] = "Rect"
+        ["bool"] = nameof(Boolean),
+        ["Rect"] = "Rect",
+        ["Padding"] = "Padding"
     };
+
+    private static string PropertyToJson(IPropertySymbol property, PropertyDeclarationSyntax declaration)
+        => $@"{Spacing(3)}[nameof({property.Name})] = {property.Name}.ToJson(),";
+
 }

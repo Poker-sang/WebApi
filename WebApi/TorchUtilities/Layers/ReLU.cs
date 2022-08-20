@@ -1,16 +1,18 @@
-﻿using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using TorchSharp;
+﻿using TorchSharp;
+using WebApi.TorchUtilities.Attributes;
+using WebApi.TorchUtilities.Interfaces;
+using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Layers;
 
 // ReSharper disable once InconsistentNaming
-public class ReLU : Module
+[Deserializer]
+public partial class ReLU : Module, IDeserialize<ReLU>
 {
-    public bool InPlace { get; set; }
+    public Optional<bool> InPlace { get; set; }
 
-    [JsonIgnore]
-    public override long OutputChannels
+    [DeserializerIgnore]
+    public override Optional<long> OutputChannels
     {
         get => Last.OutputChannels;
         set => Last.OutputChannels = value;
