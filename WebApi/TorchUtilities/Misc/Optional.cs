@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using WebApi.TorchUtilities.Services;
 
@@ -42,13 +41,13 @@ public struct Optional<T>
 
     public JsonObject ToJson(string callerName)
     {
+        var isBinding = false;
+        var bindingValue = (JsonNode?)null;
         if (Binding.HasValue)
-            return new()
-            {
-                ["name"] = callerName,
-                ["type"] = nameof(Binding),
-                ["value"] = Binding.Value is -1 ? "*" : $"${Binding.Value}"
-            };
+        {
+            isBinding = true;
+            bindingValue = Binding.Value;
+        }
         switch (0)
         {
             case 0 when typeof(T).IsPrimitive:
@@ -57,7 +56,8 @@ public struct Optional<T>
                 {
                     ["name"] = callerName,
                     ["type"] = typeof(T).Name,
-                    ["value"] = JsonValue.Create(_value)
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? JsonValue.Create(_value)
                 };
             case 0 when typeof(T) == typeof(Rect):
                 var r = (_value as Rect?)!.Value;
@@ -65,7 +65,8 @@ public struct Optional<T>
                 {
                     ["name"] = callerName,
                     ["type"] = nameof(Rect),
-                    ["value"] = new JsonArray(r.Item1, r.Item2)
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? new JsonArray(r.Item1, r.Item2)
                 };
             case 0 when typeof(T) == typeof(PaddingType):
                 var p = (_value as PaddingType?)!.Value;
@@ -73,8 +74,9 @@ public struct Optional<T>
                 {
                     ["name"] = callerName,
                     ["type"] = nameof(PaddingType),
-                    ["value"] = p.ToJson()
-                }; 
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? p.ToJson()
+                };
             default:
                 throw new NotSupportedException();
 

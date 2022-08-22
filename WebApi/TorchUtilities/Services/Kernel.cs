@@ -9,6 +9,7 @@ namespace WebApi.TorchUtilities.Services;
 public static class Kernel
 {
     public static Rect GetRect(this JsonElement je) => new(je[0].GetInt64(), je[1].GetInt64());
+    public static JsonArray RectToJson(this Rect r) => new(r.Item1, r.Item2);
     public static PaddingType GetPadding(this JsonElement je) => je.ValueKind is JsonValueKind.Array ? je.GetRect() : je.GetUInt16();
 
     public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
@@ -24,7 +25,7 @@ public static class Kernel
             {
                 JsonValueKind.Array => result.GetArrayLength() switch
                 {
-                    2 => result.GetRect(),
+                    2 => result.GetRect().RectToJson(),
                     _ => throw new NotSupportedException()
                 },
                 JsonValueKind.Number => result.GetInt64(),
@@ -47,18 +48,24 @@ public static class Kernel
     public static JsonArray? GetOptParams(this JsonElement je)
     {
         var result = new SortedSet<int>();
+        var hasAsterisk = false;
         foreach (var jsonProperty in je.EnumerateObject())
             if (jsonProperty.Value.TrySplitOptParam(out var rst))
-                _ = result.Add(rst);
+                if (rst is -1)
+                    hasAsterisk = true;
+                else
+                    _ = result.Add(rst);
 
         if (result.Count is 0)
             return null;
         var ja = new JsonArray();
+        if (hasAsterisk)
+            ja.Add("*");
         foreach (var i in result)
             ja.Add(i);
         return ja;
     }
-
+    
     public static Database.Sequential? FindSequential(this string sequentialName) =>
         App.Database.SequentialRecord.Find(sequentialName);
 }

@@ -27,8 +27,6 @@ public partial class Conv2d : Module, IDeserialize<Conv2d>
 
     public override torch.nn.Module ToTorch() =>
         ((PaddingType)Padding).GetPadding() is { } paddingType
-            ? torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, paddingType, Stride, Dilation, PaddingMode,
-                Groups, Bias)
-            : torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, Stride, ((PaddingType)Padding).GetRect(), Dilation, PaddingMode,
-                Groups, Bias);
+            ? torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, paddingType, Stride, Dilation, PaddingMode, Groups, Bias)
+            : torch.nn.Conv2d(InputChannels, OutputChannels, KernelSize, Stride, ((PaddingType)Padding).GetRect(), Dilation, PaddingMode, Groups, Bias);
 }
