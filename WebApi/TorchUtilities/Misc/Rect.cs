@@ -1,6 +1,4 @@
-﻿global using Rect = System.ValueTuple<long, long>;
-
-/*
+﻿/*
 public struct Rect : Tuple<int,int>
 {
     public long Value1 { get; set; }

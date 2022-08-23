@@ -1,17 +1,14 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using TorchSharp;
 using WebApi.TorchUtilities.Misc;
 using WebApi.TorchUtilities.Sequences;
 
 namespace WebApi.TorchUtilities.Services;
 
-public static class Kernel
+public static class JsonUtilities
 {
-    public static Rect GetRect(this JsonElement je) => new(je[0].GetInt64(), je[1].GetInt64());
-    public static JsonArray RectToJson(this Rect r) => new(r.Item1, r.Item2);
-    public static PaddingType GetPadding(this JsonElement je) => je.ValueKind is JsonValueKind.Array ? je.GetRect() : je.GetUInt16();
-
     public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
             t.IsSubclassOf(typeof(Module)) && !t.IsSubclassOf(typeof(Sequential)))
         .Select(t => t.ToString()).ToHashSet();
@@ -25,7 +22,7 @@ public static class Kernel
             {
                 JsonValueKind.Array => result.GetArrayLength() switch
                 {
-                    2 => result.GetRect().RectToJson(),
+                    2 => result.GetRect().ToJson(),
                     _ => throw new NotSupportedException()
                 },
                 JsonValueKind.Number => result.GetInt64(),
@@ -65,7 +62,19 @@ public static class Kernel
             ja.Add(i);
         return ja;
     }
-    
+
     public static Database.Sequential? FindSequential(this string sequentialName) =>
         App.Database.SequentialRecord.Find(sequentialName);
+
+    public static JsonNode? ToJsonNode(this object? obj) =>
+        obj switch
+        {
+            null => null,
+            long o => o,
+            bool o => o,
+            Rect o => o.ToJson(),
+            PaddingModes o => JsonValue.Create(o),
+            PaddingType o => o.ToJson(),
+            _ => throw new InvalidDataException()
+        };
 }

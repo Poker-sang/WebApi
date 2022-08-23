@@ -24,13 +24,16 @@ public class CnnDatabaseContext : DbContext
         {
             _ = entity.HasKey(e => e.Name);
 
-            _ = entity.ToTable("CnnTable");
+            _ = entity.ToTable("Sequential");
 
             _ = entity.Property(e => e.Name)
                 .HasMaxLength(32)
                 .IsUnicode(false);
 
-            _ = entity.Property(e => e.ParamsJson).IsUnicode(false);
+            _ = entity.Property(e => e.ParamsName).IsUnicode(false);
+            _ = entity.Property(e => e.ParamsType).IsUnicode(false);
+            _ = entity.Property(e => e.ParamsRemark).IsUnicode(false);
+            _ = entity.Property(e => e.ParamsDefault).IsUnicode(false);
 
             _ = entity.Property(e => e.ContentJson).IsUnicode(false);
 

@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 using TorchSharp;
+using WebApi.TorchUtilities.Services;
 
 namespace WebApi.TorchUtilities.Misc;
 
-public struct PaddingType
+public struct PaddingType : IParsable<PaddingType>
 {
     private Rect? _rect;
     private Padding? _padding;
@@ -51,5 +52,34 @@ public struct PaddingType
     {
         value = _padding;
         return _padding is not null;
+    }
+
+    public static PaddingType Parse(string s, IFormatProvider? provider = null)
+    {
+        if (int.TryParse(s, out var result1))
+            return result1;
+        if (s.RectTryParse(out var result2))
+            return result2;
+        throw new FormatException();
+    }
+
+    public static bool TryParse(string? s, IFormatProvider? provider, out PaddingType result)
+    {
+        result = default;
+        if (s is null)
+            return false;
+
+        if (int.TryParse(s, out var result1))
+        {
+            result = result1;
+            return true;
+        }
+        if (s.RectTryParse(out var result2))
+        {
+            result = result2;
+            return true;
+        }
+
+        return false;
     }
 }

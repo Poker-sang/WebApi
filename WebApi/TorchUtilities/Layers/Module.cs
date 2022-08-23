@@ -10,7 +10,6 @@ public abstract class Module
     public virtual Module Last { get; set; } = null!;
 
     [DeserializerIgnore]
-    // TODO
     public virtual long InputChannels
     {
         get => Last.OutputChannels.TryGetValue;

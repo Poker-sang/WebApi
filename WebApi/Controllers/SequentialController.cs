@@ -59,13 +59,15 @@ public class SequentialController : ControllerBase
     public JsonArray Params(string sequentialName) =>
         sequentialName.FindSequential() is not { } s
             ? new()
-            : new(JsonDocument.Parse(s.ParamsJson).RootElement.EnumerateArray()
-                .Select((je, index) =>
+            : new(s.GetParams()
+                .Select((param, index) =>
                     (JsonNode)new JsonObject
                     {
                         ["key"] = index,
-                        ["name"] = je.GetProperty("Name").GetString(),
-                        ["type"] = je.GetProperty("Type").GetString()
+                        [nameof(ParamUtilities.Param.Name).ToCamel()] = param.Name,
+                        [nameof(ParamUtilities.Param.Type).ToCamel()] = param.Type.GetName(),
+                        [nameof(ParamUtilities.Param.Remark).ToCamel()] = param.Remark,
+                        [nameof(ParamUtilities.Param.Default).ToCamel()] = param.Default.ToJsonNode()
                     }).ToArray());
 
     #region Layers
