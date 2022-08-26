@@ -1,9 +1,6 @@
-﻿using System.Collections.Immutable;
-using WebApi.TorchUtilities.Services;
+﻿namespace WebApi.Database;
 
-namespace WebApi.Database;
-
-public class Sequential
+public class SequentialRecord
 {
     public string Name { get; set; } = null!;
     public short Layers { get; set; }
@@ -15,6 +12,4 @@ public class Sequential
     public string ParamsType { get; set; } = null!;
     public string ParamsRemark { get; set; } = null!;
     public string ParamsDefault { get; set; } = null!;
-
 }
-

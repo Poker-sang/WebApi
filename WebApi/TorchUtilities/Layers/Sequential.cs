@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 using TorchSharp;
 using WebApi.TorchUtilities.Attributes;
-using WebApi.TorchUtilities.Layers;
 using WebApi.TorchUtilities.Misc;
 
-namespace WebApi.TorchUtilities.Sequences;
+namespace WebApi.TorchUtilities.Layers;
 
 public class Sequential : Module, IEnumerable<Module>
 {
@@ -45,6 +44,7 @@ public class Sequential : Module, IEnumerable<Module>
 
     [DeserializerIgnore]
     public List<Module> Modules { get; } = new();
+
     [DeserializerIgnore]
     public IEnumerable<Module> ModulesOutput => Modules.Where(t => t is not InputLayer);
 

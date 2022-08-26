@@ -6,7 +6,7 @@ public static class ParamUtilities
 {
     public record Param(string Name, Type Type, string? Remark, object Default);
 
-    public static List<Param> GetParams(this Sequential s)
+    public static List<Param> GetParams(this SequentialRecord s)
     {
         var p = new List<Param>();
         var names = s.ParamsName.Split(';');
@@ -16,6 +16,8 @@ public static class ParamUtilities
         if (names.Length != types.Length || types.Length != remarks.Length ||
             remarks.Length != defaultValues.Length)
             throw new InvalidDataException();
+        if (names.Length is 1 && names[0] is "")
+            return new();
         for (var i = 0; i < names.Length; ++i)
         {
             var type = types[i].ParseType();

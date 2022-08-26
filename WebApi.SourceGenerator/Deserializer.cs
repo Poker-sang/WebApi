@@ -81,7 +81,7 @@ partial class {name} : IDeserialize<{name}>
         return $"{Spacing(4)}case nameof({name}): result.{name} = {type}.FromJson(jp.Value); break;";
     }
 
-    private static readonly Dictionary<string, string> PresetTypes = new()
+    private static readonly Dictionary<string, string> _presetTypes = new()
     {
         ["sbyte"] = nameof(SByte),
         ["byte"] = nameof(Byte),

@@ -1,9 +1,6 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
-using TorchSharp;
-using WebApi.TorchUtilities.Misc;
-using WebApi.TorchUtilities.Sequences;
+using WebApi.TorchUtilities.Layers;
 
 namespace WebApi.TorchUtilities.Services;
 
@@ -11,7 +8,7 @@ public static class JsonUtilities
 {
     public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
             t.IsSubclassOf(typeof(Module)) && !t.IsSubclassOf(typeof(Sequential)))
-        .Select(t => t.ToString()).ToHashSet();
+        .Select(t => t.Name).ToHashSet();
 
     public static string GetLayerType(this string typeName) => PresetTypes.Contains(typeName) ? "normal" : "sequential";
 
@@ -62,19 +59,4 @@ public static class JsonUtilities
             ja.Add(i);
         return ja;
     }
-
-    public static Database.Sequential? FindSequential(this string sequentialName) =>
-        App.Database.SequentialRecord.Find(sequentialName);
-
-    public static JsonNode? ToJsonNode(this object? obj) =>
-        obj switch
-        {
-            null => null,
-            long o => o,
-            bool o => o,
-            Rect o => o.ToJson(),
-            PaddingModes o => JsonValue.Create(o),
-            PaddingType o => o.ToJson(),
-            _ => throw new InvalidDataException()
-        };
 }

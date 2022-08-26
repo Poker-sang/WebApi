@@ -58,9 +58,7 @@ public struct PaddingType : IParsable<PaddingType>
     {
         if (int.TryParse(s, out var result1))
             return result1;
-        if (s.RectTryParse(out var result2))
-            return result2;
-        throw new FormatException();
+        return s.RectTryParse(out var result2) ? (PaddingType)result2 : throw new FormatException();
     }
 
     public static bool TryParse(string? s, IFormatProvider? provider, out PaddingType result)
@@ -74,6 +72,7 @@ public struct PaddingType : IParsable<PaddingType>
             result = result1;
             return true;
         }
+
         if (s.RectTryParse(out var result2))
         {
             result = result2;

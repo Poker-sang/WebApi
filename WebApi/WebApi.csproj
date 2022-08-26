@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <TypeScriptTarget>ESNext</TypeScriptTarget>
@@ -27,7 +27,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-        <PackageReference Include="TorchSharp-cpu" Version="0.97.2" />
+        <PackageReference Include="TorchSharp-cpu" Version="0.97.3" />
     </ItemGroup>
 
     <ItemGroup>

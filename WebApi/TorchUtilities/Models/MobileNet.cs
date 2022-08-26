@@ -24,7 +24,9 @@ public class MobileNet : Net
             new Conv2dDw(512),
             new Conv2dDw(1024) { Stride = (2, 2) },
             new Conv2dDw(1024),
-            new AvgPool2d((7, 7))
+            new AvgPool2d((7, 7)),
+            new Flatten(),
+            new Linear(1024, 10)
         };
 
     public Sequential Layers { get; }
@@ -32,8 +34,6 @@ public class MobileNet : Net
     public override torch.Tensor Forward(torch.Tensor t)
     {
         t = Layers.ToTorch().forward(t);
-        t = t.flatten(1);
-        t = new Linear(1024, 10).ToTorch().forward(t);
         return t;
     }
 }

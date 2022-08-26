@@ -11,7 +11,7 @@ public class CnnDatabaseContext : DbContext
         : base(options)
         => _connectionString = connectionString;
 
-    public virtual DbSet<Sequential> SequentialRecord { get; set; } = null!;
+    public virtual DbSet<SequentialRecord> SequentialRecord { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -20,7 +20,7 @@ public class CnnDatabaseContext : DbContext
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
-        modelBuilder.Entity<Sequential>(entity =>
+        modelBuilder.Entity<SequentialRecord>(entity =>
         {
             _ = entity.HasKey(e => e.Name);
 
