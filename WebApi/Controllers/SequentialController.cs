@@ -12,7 +12,7 @@ namespace WebApi.Controllers;
 public class SequentialController : ControllerBase
 {
     /// <returns><b>数据库</b>中全部的<see cref="SequentialRecord"/>及其元数据</returns>
-    [HttpPost("All")]
+    [HttpGet("All")]
     public JsonArray All() =>
         new(App.Database.SequentialRecord.ToArray()
             .Select((s, index)
@@ -29,9 +29,9 @@ public class SequentialController : ControllerBase
     #region Find
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的全部元数据</returns>
-    [HttpPost("Find")]
-    public JsonObject? Find(string sequentialName) =>
-        sequentialName.FindSequential() is not { } s
+    [HttpGet("Find")]
+    public async Task<JsonObject?> Find(string sequentialName) =>
+        await sequentialName.FindSequential() is not { } s
             ? null
             : new JsonObject
             {
@@ -43,9 +43,9 @@ public class SequentialController : ControllerBase
             };
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的指定元数据</returns>
-    [HttpPost("Find/Metadata")]
-    public dynamic? FindMetaData(string sequentialName, string metadataName) =>
-        sequentialName.FindSequential() is not { } s
+    [HttpGet("Find/Metadata")]
+    public async Task<dynamic?> FindMetaData(string sequentialName, string metadataName) =>
+        await sequentialName.FindSequential() is not { } s
             ? null
             : metadataName switch
             {
@@ -60,9 +60,9 @@ public class SequentialController : ControllerBase
     #endregion
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的参数</returns>
-    [HttpPost("Params")]
-    public JsonArray Params(string sequentialName) =>
-        sequentialName.FindSequential() is not { } s
+    [HttpGet("Params")]
+    public async Task<JsonArray> Params(string sequentialName) =>
+        await sequentialName.FindSequential() is not { } s
             ? new()
             : new(s.GetParams()
                 .Select((param, index) =>
@@ -78,9 +78,9 @@ public class SequentialController : ControllerBase
     #region Layers
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>包含的全部层及其被指定的参数</returns>
-    [HttpPost("Layers")]
-    public JsonArray Layers(string sequentialName) =>
-        sequentialName.FindSequential() is not { } s
+    [HttpGet("Layers")]
+    public async Task<JsonArray> Layers(string sequentialName) =>
+        await sequentialName.FindSequential() is not { } s
             ? new()
             : new(JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray()
                 .Select((je, index) =>
@@ -99,10 +99,10 @@ public class SequentialController : ControllerBase
                 }).ToArray());
 
     /// <returns><see cref="Sequential"/>中指定层的<b>全部</b>参数、包括默认参数</returns>
-    [HttpPost("Layers/Edit")]
-    public JsonArray? LayersEdit(string sequentialName, int index)
+    [HttpGet("Layers/Edit")]
+    public async Task<JsonArray?> LayersEdit(string sequentialName, int index)
     {
-        if (sequentialName.FindSequential() is not { } s)
+        if (await sequentialName.FindSequential() is not { } s)
             return null;
 
         var arr = JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray().ToArray();
@@ -122,7 +122,7 @@ public class SequentialController : ControllerBase
         } is { } ja)
             return ja;
 
-        if (name.FindSequential() is not { } s2)
+        if (await name.FindSequential() is not { } s2)
             return null;
 
         var p = new Dictionary<string, (Type Type, object Value)>(s2.GetParams()
@@ -136,6 +136,26 @@ public class SequentialController : ControllerBase
 
         return new(p.Select(pair => (JsonNode)((Optional<object>)pair.Value.Value).ToJson(pair.Value.Type, pair.Key)).ToArray());
     }
+
+    /// <returns>所有用户自定义的<see cref="Sequential"/>）</returns>
+    [HttpGet("Layers/All")]
+    public JsonArray LayersAll() =>
+        new(App.Database.SequentialRecord.ToArray().Select(t =>
+            (JsonNode)new JsonObject
+            {
+                ["label"] = t.Name,
+                ["value"] = t.Name
+            }).ToArray());
+
+    /// <returns>所有基础的类型（继承于<see cref="Module"/>但不继承于<see cref="Sequential"/>）</returns>
+    [HttpGet("Layers/New")]
+    public JsonArray LayersNew() =>
+        new(JsonUtilities.PresetTypes.Select(t =>
+            (JsonNode)new JsonObject
+            {
+                ["label"] = t,
+                ["value"] = t
+            }).ToArray());
 
     #endregion
 }

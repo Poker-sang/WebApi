@@ -77,7 +77,4 @@ public static class TypeUtilities
             PaddingType o => o.ToJson(),
             _ => throw new InvalidDataException()
         };
-
-    public static SequentialRecord? FindSequential(this string sequentialName) =>
-        App.Database.SequentialRecord.Find(sequentialName);
 }

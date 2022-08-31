@@ -93,12 +93,12 @@ public static class Optional
     }
 }
 
-public struct Optional<T>
+public struct Optional<T> where T : notnull
 {
     private readonly T? _value;
     public int? Binding { get; set; }
 
-    private void RestrictGenerics()
+    private static void RestrictGenerics()
     {
         if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Optional<>))
             throw new InvalidDataException($"Invalid Generic {typeof(T)}");
@@ -113,9 +113,10 @@ public struct Optional<T>
     }
 
     public static implicit operator Optional<object>(Optional<T> v) => new(v._value) { Binding = v.Binding };
-    public static implicit operator Optional<T>(Optional<object> v) => new((T?)v._value) { Binding = v.Binding };
+    public static implicit operator Optional<T>(Optional<object> v) => v._value is null ? new() { Binding = v.Binding } : new((T?)v._value);
+
     public static implicit operator Optional<T>(T v) => new(v);
-    public static implicit operator T(Optional<T> v) => v._value ?? throw new InvalidDataException();
+    public static implicit operator T(Optional<T> v) => v._value ?? throw new NullReferenceException();
 
     public T? TryGetValue => _value ?? default;
 

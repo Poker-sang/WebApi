@@ -36,6 +36,8 @@ public static class JsonUtilities
             v = -1;
         else if (int.TryParse(str[1..], out var rst))
             v = rst;
+        else 
+            return false;
         return true;
     }
 
