@@ -8,7 +8,7 @@ namespace WebApi.TorchUtilities.Layers;
 [Deserializer]
 public partial class Conv2d : Module, IDeserialize<Conv2d>
 {
-    private Conv2d() { }
+    public Conv2d() { }
 
     public Conv2d(long outputChannel, Rect kernelSize)
     {
@@ -16,8 +16,8 @@ public partial class Conv2d : Module, IDeserialize<Conv2d>
         KernelSize = kernelSize;
     }
 
-    public sealed override Optional<long> OutputChannels { get; set; }
-    public Optional<Rect> KernelSize { get; set; }
+    public sealed override Optional<long> OutputChannels { get; set; } = Optional<long>.Default;
+    public Optional<Rect> KernelSize { get; set; } = Optional<Rect>.Default;
     public Optional<Rect> Stride { get; set; } = (1, 1);
     public Optional<PaddingType> Padding { get; set; } = new PaddingType();
     public Optional<Rect> Dilation { get; set; } = (1, 1);

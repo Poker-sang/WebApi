@@ -96,6 +96,12 @@ public static class Optional
 public struct Optional<T> where T : notnull
 {
     private readonly T? _value;
+    /// <summary>
+    /// 取值：
+    /// <br/>[0, +inf)表示绑定第n个参数
+    /// <br/>-1("*")表示绑定默认参数：<see langword="long"/>InputChannels
+    /// <br/>-2表示缺少参数
+    /// </summary>
     public int? Binding { get; set; }
 
     private static void RestrictGenerics()
@@ -103,6 +109,8 @@ public struct Optional<T> where T : notnull
         if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Optional<>))
             throw new InvalidDataException($"Invalid Generic {typeof(T)}");
     }
+
+    public static Optional<T> Default => new() { Binding = -2 };
 
     public Optional() => RestrictGenerics();
 

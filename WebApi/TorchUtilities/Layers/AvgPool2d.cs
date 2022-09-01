@@ -8,14 +8,17 @@ namespace WebApi.TorchUtilities.Layers;
 [Deserializer]
 public partial class AvgPool2d : Module, IDeserialize<AvgPool2d>
 {
-    private AvgPool2d() { }
+    public AvgPool2d() { }
 
+    [DeserializerIgnore]
     public override Optional<long> OutputChannels
     {
         get => Last.OutputChannels;
         set => Last.OutputChannels = value;
     }
-    public Optional<Rect> KernelSize { get; set; }
+
+    public Optional<Rect> KernelSize { get; set; } = Optional<Rect>.Default;
+
     public Optional<Rect> Stride { get; set; } = (1, 1);
 
     public AvgPool2d(Rect kernelSize) => KernelSize = kernelSize;

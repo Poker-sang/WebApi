@@ -5,7 +5,16 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{292715F4-12A3-4F95-886C-28F34E38D80D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.SourceGenerator", "WebApi.SourceGenerator\WebApi.SourceGenerator.csproj", "{45616D80-52C8-43DE-8027-73C40B12969E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.SourceGenerator", "WebApi.SourceGenerator\WebApi.SourceGenerator.csproj", "{45616D80-52C8-43DE-8027-73C40B12969E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{FDDB4073-B70D-4569-97AC-3A0E58EEE192}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

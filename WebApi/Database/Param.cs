@@ -4,7 +4,7 @@ namespace WebApi.Database;
 
 public static class ParamUtilities
 {
-    public record Param(string Name, Type Type, string? Remark, object Default);
+    public record Param(string Name, Type Type, string? Remark, object? Default);
 
     public static List<Param> GetParams(this SequentialRecord s)
     {

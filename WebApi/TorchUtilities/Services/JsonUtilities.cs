@@ -7,10 +7,10 @@ namespace WebApi.TorchUtilities.Services;
 public static class JsonUtilities
 {
     public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
-            t.IsSubclassOf(typeof(Module)) && !t.IsSubclassOf(typeof(Sequential)))
+            t.IsSubclassOf(typeof(Module)) && !t.IsSubclassOf(typeof(Sequential)) && !t.IsSubclassOf(typeof(InputLayer)))
         .Select(t => t.Name).ToHashSet();
 
-    public static string GetLayerType(this string typeName) => PresetTypes.Contains(typeName) ? "normal" : "sequential";
+    public static string GetLayerType(this string typeName) => PresetTypes.Contains(typeName) ? "builtin" : "sequential";
 
     public static dynamic? GetDynamicProperty(this JsonElement je, string property) =>
         !je.TryGetProperty(property, out var result)
