@@ -6,25 +6,25 @@ namespace WebApi.TorchUtilities.Misc;
 
 public static class Optional
 {
-    public static Optional<dynamic> FromJson(Type t, JsonElement je) =>
-        je.TrySplitOptParam(out var rst)
+    public static Optional<dynamic> FromJson(Type t, JsonNode jn) =>
+        jn.TrySplitOptParam(out var rst)
             ? new() { Binding = rst }
             : new(0 switch
             {
-                0 when t == typeof(sbyte) => je.GetSByte(),
-                0 when t == typeof(byte) => je.GetByte(),
-                0 when t == typeof(short) => je.GetInt16(),
-                0 when t == typeof(ushort) => je.GetUInt16(),
-                0 when t == typeof(int) => je.GetInt32(),
-                0 when t == typeof(uint) => je.GetUInt32(),
-                0 when t == typeof(long) => je.GetInt64(),
-                0 when t == typeof(ulong) => je.GetUInt64(),
-                0 when t == typeof(float) => je.GetSingle(),
-                0 when t == typeof(double) => je.GetDouble(),
-                0 when t == typeof(bool) => je.GetBoolean(),
-                0 when t == typeof(Rect) => je.GetRect(),
-                0 when t == typeof(PaddingType) => je.GetPadding(),
-                0 when t.IsEnum => je.GetUInt16(),
+                0 when t == typeof(sbyte) => jn.GetValue<sbyte>(),
+                0 when t == typeof(byte) => jn.GetValue<byte>(),
+                0 when t == typeof(short) => jn.GetValue<short>(),
+                0 when t == typeof(ushort) => jn.GetValue<ushort>(),
+                0 when t == typeof(int) => jn.GetValue<int>(),
+                0 when t == typeof(uint) => jn.GetValue<uint>(),
+                0 when t == typeof(long) => jn.GetValue<long>(),
+                0 when t == typeof(ulong) => jn.GetValue<ulong>(),
+                0 when t == typeof(float) => jn.GetValue<float>(),
+                0 when t == typeof(double) => jn.GetValue<double>(),
+                0 when t == typeof(bool) => jn.GetValue<bool>(),
+                0 when t == typeof(Rect) => jn.GetRect(),
+                0 when t == typeof(PaddingType) => jn.GetPadding(),
+                0 when t.IsEnum => jn.GetValue<ushort>(),
                 _ => throw new NotSupportedException()
             });
 
@@ -128,7 +128,7 @@ public struct Optional<T> where T : notnull
 
     public T? TryGetValue => _value ?? default;
 
-    public static Optional<T> FromJson(JsonElement je) => Optional.FromJson(typeof(T), je);
+    public static Optional<T> FromJson(JsonNode jn) => Optional.FromJson(typeof(T), jn);
 
     public JsonObject ToJson(string callerName) => Optional.ToJson(this, typeof(T), callerName);
 }

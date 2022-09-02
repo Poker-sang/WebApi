@@ -1,6 +1,5 @@
 ﻿global using Rect = System.ValueTuple<long, long>;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using TorchSharp;
@@ -10,8 +9,8 @@ namespace WebApi.TorchUtilities.Services;
 
 public static class TypeUtilities
 {
-    public static Rect GetRect(this JsonElement je) => new(je[0].GetInt64(), je[1].GetInt64());
-    public static PaddingType GetPadding(this JsonElement je) => je.ValueKind is JsonValueKind.Array ? je.GetRect() : je.GetUInt16();
+    public static Rect GetRect(this JsonNode ja) => new(ja[0]!.GetValue<long>(), ja[1]!.GetValue<long>());
+    public static PaddingType GetPadding(this JsonNode je) => je is JsonArray ja ? ja.GetRect() : je.AsValue().GetValue<ushort>();
 
     public static JsonArray ToJson(this Rect r) => new(r.Item1, r.Item2);
     public static Rect RectParse(this string s)

@@ -28,11 +28,11 @@ namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
 
 partial class {name} : IDeserialize<{name}>
 {{
-    public static {name} Deserialize(JsonElement jsonElement)
+    public static {name} Deserialize(JsonObject jsonObject)
     {{
         var result = new {name}();
-        foreach (var jp in jsonElement.EnumerateObject())
-            switch (jp.Name)
+        foreach (var (key, value) in jsonObject)
+            switch (key)
             {{
 ");
         var deserializeEndAndToJsonBegin = new StringBuilder(@$"{Spacing(3)}}}
@@ -78,7 +78,7 @@ partial class {name} : IDeserialize<{name}>
         if (type.EndsWith("?"))
             type = type.Substring(0, type.Length - 1);
 
-        return $"{Spacing(4)}case nameof({name}): result.{name} = {type}.FromJson(jp.Value); break;";
+        return $"{Spacing(4)}case nameof({name}): result.{name} = {type}.FromJson(value!); break;";
     }
 
     private static readonly Dictionary<string, string> _presetTypes = new()

@@ -11,7 +11,7 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public partial class SequentialController : ControllerBase
 {
-    /// <returns><b>Êı¾İ¿â</b>ÖĞÈ«²¿µÄ<see cref="SequentialRecord"/>¼°ÆäÔªÊı¾İ</returns>
+    /// <returns><b>æ•°æ®åº“</b>ä¸­å…¨éƒ¨çš„<see cref="SequentialRecord"/>åŠå…¶å…ƒæ•°æ®</returns>
     [HttpGet("All")]
     public JsonArray All() =>
         new(App.Database.SequentialRecord.ToArray()
@@ -28,7 +28,7 @@ public partial class SequentialController : ControllerBase
 
     #region Find
 
-    /// <returns><b>Êı¾İ¿â</b>ÖĞ<see cref="SequentialRecord"/>µÄÈ«²¿ÔªÊı¾İ</returns>
+    /// <returns><b>æ•°æ®åº“</b>ä¸­<see cref="SequentialRecord"/>çš„å…¨éƒ¨å…ƒæ•°æ®</returns>
     [HttpGet("Find")]
     public async Task<JsonObject?> Find(string sequentialName) =>
         await sequentialName.FindSequential() is not { } s
@@ -42,7 +42,7 @@ public partial class SequentialController : ControllerBase
                 [s.Remark.CamelName()] = s.Remark
             };
 
-    /// <returns><b>Êı¾İ¿â</b>ÖĞ<see cref="SequentialRecord"/>µÄÖ¸¶¨ÔªÊı¾İ</returns>
+    /// <returns><b>æ•°æ®åº“</b>ä¸­<see cref="SequentialRecord"/>çš„æŒ‡å®šå…ƒæ•°æ®</returns>
     [HttpGet("Find/Metadata")]
     public async Task<dynamic?> FindMetaData(string sequentialName, string metadataName) =>
         await sequentialName.FindSequential() is not { } s
@@ -59,7 +59,7 @@ public partial class SequentialController : ControllerBase
 
     #endregion
 
-    /// <returns><b>Êı¾İ¿â</b>ÖĞ<see cref="SequentialRecord"/>µÄ²ÎÊı</returns>
+    /// <returns><b>æ•°æ®åº“</b>ä¸­<see cref="SequentialRecord"/>çš„å‚æ•°</returns>
     [HttpGet("Params")]
     public async Task<JsonArray> Params(string sequentialName) =>
         await sequentialName.FindSequential() is not { } s
@@ -77,67 +77,73 @@ public partial class SequentialController : ControllerBase
 
     #region Layers
 
-    /// <returns><b>Êı¾İ¿â</b>ÖĞ<see cref="SequentialRecord"/>°üº¬µÄÈ«²¿²ã¼°Æä±»Ö¸¶¨µÄ²ÎÊı</returns>
+    /// <returns><b>æ•°æ®åº“</b>ä¸­<see cref="SequentialRecord"/>åŒ…å«çš„å…¨éƒ¨å±‚åŠå…¶è¢«æŒ‡å®šçš„å‚æ•°</returns>
     [HttpGet("Layers")]
-    public async Task<JsonArray> Layers(string sequentialName) =>
-        await sequentialName.FindSequential() is not { } s
-            ? new()
-            : new(JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray()
-                .Select((je, index) =>
+    public async Task<JsonArray> Layers(string sequentialName)
+    {
+        var items = JsonNode.Parse((await sequentialName.FindSequential())?.ContentJson ?? "")?.AsArray()
+            .Select((je, index) =>
+            {
+                var jo = je?.AsObject() ?? throw new NullReferenceException(nameof(je));
+                var name = jo["Name"]?.AsValue().GetValue<string>() ?? throw new NullReferenceException("Name");
+                return (JsonNode)new JsonObject
                 {
-                    var name = je.GetProperty("Name").GetString()!;
-                    return (JsonNode)new JsonObject
-                    {
-                        ["key"] = index,
-                        ["name"] = name,
-                        ["type"] = name.GetLayerType(),
-                        ["containsParams"] = je.GetOptParams(),
-                        [nameof(Module.OutputChannels).ToCamel()] = je.GetDynamicProperty(nameof(Module.OutputChannels)),
-                        [nameof(Conv2d.KernelSize).ToCamel()] = je.GetDynamicProperty(nameof(Conv2d.KernelSize)),
-                        [nameof(Conv2d.Stride).ToCamel()] = je.GetDynamicProperty(nameof(Conv2d.Stride))
-                    };
-                }).ToArray());
+                    ["key"] = index,
+                    ["name"] = name,
+                    ["type"] = name.GetLayerType(),
+                    ["containsParams"] = jo.GetOptParams(),
+                    [nameof(Module.OutputChannels).ToCamel()] = jo.GetDynamicProperty(nameof(Module.OutputChannels)),
+                    [nameof(Conv2d.KernelSize).ToCamel()] = jo.GetDynamicProperty(nameof(Conv2d.KernelSize)),
+                    [nameof(Conv2d.Stride).ToCamel()] = jo.GetDynamicProperty(nameof(Conv2d.Stride))
+                };
+            })?.ToArray();
 
-    /// <returns><see cref="Sequential"/>ÖĞÖ¸¶¨²ãµÄ<b>È«²¿</b>²ÎÊı¡¢°üÀ¨Ä¬ÈÏ²ÎÊı</returns>
+        return items is null ? new() : new(items);
+    }
+
+    /// <returns><see cref="Sequential"/>ä¸­æŒ‡å®šå±‚çš„<b>å…¨éƒ¨</b>å‚æ•°ã€åŒ…æ‹¬é»˜è®¤å‚æ•°</returns>
     [HttpGet("Layers/Edit")]
     public async Task<IEnumerable<JsonArray>?> LayersEdit(string sequentialName)
-        => await sequentialName.FindSequential() is not { } s
-            ? null
-            : (IEnumerable<JsonArray>)await Task.WhenAll(JsonDocument.Parse(s.ContentJson).RootElement.EnumerateArray()
-                .Select(async layer =>
+    {
+        var task = JsonNode.Parse((await sequentialName.FindSequential())?.ContentJson ?? "")?.AsArray()
+            .Select(async jn =>
+            {
+                var layer = jn?.AsObject() ?? throw new NullReferenceException(nameof(jn));
+                var name = layer["Name"]?.AsValue().GetValue<string>() ??
+                           throw new NullReferenceException(nameof(layer));
+                if (name switch
                 {
-                    var name = layer.GetProperty("Name").GetString()!;
-                    if (name switch
-                        {
-                            nameof(Conv2d) => Conv2d.Deserialize(layer).ToJson(),
-                            nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToJson(),
-                            nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToJson(),
-                            nameof(Linear) => Linear.Deserialize(layer).ToJson(),
-                            nameof(Flatten) => Flatten.Deserialize(layer).ToJson(),
-                            nameof(ReLU) => ReLU.Deserialize(layer).ToJson(),
-                            _ => null
-                        } is { } ja)
-                        return ja;
+                    nameof(Conv2d) => Conv2d.Deserialize(layer).ToJson(),
+                    nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToJson(),
+                    nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToJson(),
+                    nameof(Linear) => Linear.Deserialize(layer).ToJson(),
+                    nameof(Flatten) => Flatten.Deserialize(layer).ToJson(),
+                    nameof(ReLU) => ReLU.Deserialize(layer).ToJson(),
+                    _ => null
+                } is { } ja)
+                    return ja;
 
-                    if (await name.FindSequential() is not { } s2)
-                        throw new InvalidDataException();
+                if (await name.FindSequential() is not { } s2)
+                    throw new InvalidDataException();
 
-                    var p = new Dictionary<string, (Type Type, object? Value)>(s2.GetParams()
-                        .Select(t => new KeyValuePair<string, (Type, object?)>(t.Name, (t.Type, t.Default))));
-                    foreach (var jp in layer.EnumerateObject().Where(jp => p.ContainsKey(jp.Name)))
-                        p[jp.Name] = (p[jp.Name].Type, Optional.FromJson(p[jp.Name].Type, jp.Value));
+                var p = new Dictionary<string, (Type Type, object? Value)>(s2.GetParams()
+                    .Select(t => new KeyValuePair<string, (Type, object?)>(t.Name, (t.Type, t.Default))));
+                foreach (var jp in layer.Where(jp => p.ContainsKey(jp.Key)))
+                    p[jp.Key] = (p[jp.Key].Type, Optional.FromJson(p[jp.Key].Type, jp.Value!));
 
-                    foreach (var (key, (type, value)) in p)
-                        if (value is null)
-                            throw new ArgumentNullException(nameof(value));
-                        else if (value.GetType().GetGenericTypeDefinition() != typeof(Optional<>))
-                            p[key] = (type, Optional.FromJson(type, value));
+                foreach (var (key, (type, value)) in p)
+                    if (value is null)
+                        throw new NullReferenceException(nameof(value));
+                    else if (value.GetType().GetGenericTypeDefinition() != typeof(Optional<>))
+                        p[key] = (type, Optional.FromJson(type, value));
 
-                    return new(p.Select(pair =>
-                        (JsonNode)((Optional<object>)pair.Value.Value!).ToJson(pair.Value.Type, pair.Key)).ToArray());
-                }));
+                return new(p.Select(pair =>
+                    (JsonNode)((Optional<object>)pair.Value.Value!).ToJson(pair.Value.Type, pair.Key)).ToArray());
+            });
+        return task is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(task);
+    }
 
-    /// <returns><see cref="Sequential"/>ÖĞÖ¸¶¨²ãµÄÈ«²¿Ä¬ÈÏ²ÎÊı¡¢¼°Æä±»Ö¸¶¨µÄ²ÎÊı</returns>
+    /// <returns><see cref="Sequential"/>ä¸­æŒ‡å®šå±‚çš„å…¨éƒ¨é»˜è®¤å‚æ•°ã€åŠå…¶è¢«æŒ‡å®šçš„å‚æ•°</returns>
     [HttpGet("Layers/Default")]
     public async Task<JsonObject?> LayersDefault(string layerName)
     {
@@ -184,7 +190,7 @@ public partial class SequentialController : ControllerBase
         };
     }
 
-    /// <returns>ËùÓĞÓÃ»§×Ô¶¨ÒåµÄ<see cref="Sequential"/>£©</returns>
+    /// <returns>æ‰€æœ‰ç”¨æˆ·è‡ªå®šä¹‰çš„<see cref="Sequential"/>ï¼‰</returns>
     [HttpGet("Layers/All")]
     public JsonArray LayersAll() =>
         new(App.Database.SequentialRecord.ToArray().Select(t =>
@@ -194,7 +200,7 @@ public partial class SequentialController : ControllerBase
                 ["value"] = t.Name
             }).ToArray());
 
-    /// <returns>ËùÓĞ»ù´¡µÄÀàĞÍ£¨¼Ì³ĞÓÚ<see cref="Module"/>µ«²»¼Ì³ĞÓÚ<see cref="Sequential"/>£©</returns>
+    /// <returns>æ‰€æœ‰åŸºç¡€çš„ç±»å‹ï¼ˆç»§æ‰¿äº<see cref="Module"/>ä½†ä¸ç»§æ‰¿äº<see cref="Sequential"/>ï¼‰</returns>
     [HttpGet("Layers/New")]
     public JsonArray LayersNew() =>
         new(JsonUtilities.PresetTypes.Select(t =>
