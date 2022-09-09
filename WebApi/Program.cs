@@ -1,12 +1,14 @@
-using WebApi;
+using Microsoft.EntityFrameworkCore;
+using WebApi.Database;
 
 var builder = WebApplication.CreateBuilder(args);
-
-App.Database = new(builder.Configuration["ConnectionStrings:SqlServer"] + ";MultipleActiveResultSets=true");
 
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddDbContext<CnnDatabaseContext>(opt =>
+    opt.UseSqlServer(builder.Configuration["ConnectionStrings:SqlServer"] + ";MultipleActiveResultSets=true"));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

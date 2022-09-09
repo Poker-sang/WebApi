@@ -4,20 +4,10 @@ namespace WebApi.Database;
 
 public class CnnDatabaseContext : DbContext
 {
-    private readonly string _connectionString;
-    public CnnDatabaseContext(string connectionString) => _connectionString = connectionString;
-
-    public CnnDatabaseContext(string connectionString, DbContextOptions<CnnDatabaseContext> options)
-        : base(options)
-        => _connectionString = connectionString;
+    public CnnDatabaseContext(DbContextOptions<CnnDatabaseContext> options)
+        : base(options) { }
 
     public virtual DbSet<SequentialRecord> SequentialRecord { get; set; } = null!;
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-            _ = optionsBuilder.UseSqlServer(_connectionString);
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.Entity<SequentialRecord>(entity =>

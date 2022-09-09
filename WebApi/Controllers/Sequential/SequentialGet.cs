@@ -1,20 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using WebApi.Database;
 using WebApi.TorchUtilities.Layers;
 using WebApi.TorchUtilities.Misc;
 using WebApi.TorchUtilities.Services;
 
-namespace WebApi.Controllers;
-[ApiController]
-[Route("api/[controller]")]
-public partial class SequentialController : ControllerBase
+namespace WebApi.Controllers.Sequential;
+public partial class SequentialController
 {
     /// <returns><b>数据库</b>中全部的<see cref="SequentialRecord"/>及其元数据</returns>
     [HttpGet("All")]
     public JsonArray All() =>
-        new(App.Database.SequentialRecord.ToArray()
+        new(_dbContext.SequentialRecord.ToArray()
             .Select((s, index)
                 => (JsonNode)new JsonObject
                 {
@@ -31,7 +28,7 @@ public partial class SequentialController : ControllerBase
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的全部元数据</returns>
     [HttpGet("Find")]
     public async Task<JsonObject?> Find(string sequentialName) =>
-        await sequentialName.FindSequential() is not { } s
+        await FindSequential(sequentialName) is not { } s
             ? null
             : new JsonObject
             {
@@ -45,7 +42,7 @@ public partial class SequentialController : ControllerBase
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的指定元数据</returns>
     [HttpGet("Find/Metadata")]
     public async Task<dynamic?> FindMetaData(string sequentialName, string metadataName) =>
-        await sequentialName.FindSequential() is not { } s
+        await FindSequential(sequentialName) is not { } s
             ? null
             : metadataName switch
             {
@@ -62,7 +59,7 @@ public partial class SequentialController : ControllerBase
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的参数</returns>
     [HttpGet("Params")]
     public async Task<JsonArray> Params(string sequentialName) =>
-        await sequentialName.FindSequential() is not { } s
+        await FindSequential(sequentialName) is not { } s
             ? new()
             : new(s.GetParams()
                 .Select((param, index) =>
@@ -81,7 +78,7 @@ public partial class SequentialController : ControllerBase
     [HttpGet("Layers")]
     public async Task<JsonArray> Layers(string sequentialName)
     {
-        var items = JsonNode.Parse((await sequentialName.FindSequential())?.ContentJson ?? "")?.AsArray()
+        var items = JsonNode.Parse((await FindSequential(sequentialName))?.ContentJson ?? "")?.AsArray()
             .Select((je, index) =>
             {
                 var jo = je?.AsObject() ?? throw new NullReferenceException(nameof(je));
@@ -105,7 +102,7 @@ public partial class SequentialController : ControllerBase
     [HttpGet("Layers/Edit")]
     public async Task<IEnumerable<JsonArray>?> LayersEdit(string sequentialName)
     {
-        var task = JsonNode.Parse((await sequentialName.FindSequential())?.ContentJson ?? "")?.AsArray()
+        var tasks = JsonNode.Parse((await FindSequential(sequentialName))?.ContentJson ?? "")?.AsArray()
             .Select(async jn =>
             {
                 var layer = jn?.AsObject() ?? throw new NullReferenceException(nameof(jn));
@@ -123,7 +120,7 @@ public partial class SequentialController : ControllerBase
                 } is { } ja)
                     return ja;
 
-                if (await name.FindSequential() is not { } s2)
+                if (await FindSequential(name) is not { } s2)
                     throw new InvalidDataException();
 
                 var p = new Dictionary<string, (Type Type, object? Value)>(s2.GetParams()
@@ -140,7 +137,7 @@ public partial class SequentialController : ControllerBase
                 return new(p.Select(pair =>
                     (JsonNode)((Optional<object>)pair.Value.Value!).ToJson(pair.Value.Type, pair.Key)).ToArray());
             });
-        return task is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(task);
+        return tasks is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(tasks);
     }
 
     /// <returns><see cref="Sequential"/>中指定层的全部默认参数、及其被指定的参数</returns>
@@ -161,7 +158,7 @@ public partial class SequentialController : ControllerBase
             arr = ja;
         else
         {
-            if (await layerName.FindSequential() is not { } s)
+            if (await FindSequential(layerName) is not { } s)
                 return null;
 
             var p = new Dictionary<string, (Type Type, object Value)>(s.GetParams()
@@ -193,7 +190,7 @@ public partial class SequentialController : ControllerBase
     /// <returns>所有用户自定义的<see cref="Sequential"/>）</returns>
     [HttpGet("Layers/All")]
     public JsonArray LayersAll() =>
-        new(App.Database.SequentialRecord.ToArray().Select(t =>
+        new(_dbContext.SequentialRecord.ToArray().Select(t =>
             (JsonNode)new JsonObject
             {
                 ["label"] = t.Name,
