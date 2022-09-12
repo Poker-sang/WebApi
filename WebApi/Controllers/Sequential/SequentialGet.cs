@@ -98,7 +98,7 @@ public partial class SequentialController
         return items is null ? new() : new(items);
     }
 
-    /// <returns><see cref="Sequential"/>中指定层的<b>全部</b>参数、包括默认参数</returns>
+    /// <returns><see cref="TorchUtilities.Layers.Sequential"/>中指定层的<b>全部</b>参数、包括默认参数</returns>
     [HttpGet("Layers/Edit")]
     public async Task<IEnumerable<JsonArray>?> LayersEdit(string sequentialName)
     {
@@ -140,7 +140,7 @@ public partial class SequentialController
         return tasks is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(tasks);
     }
 
-    /// <returns><see cref="Sequential"/>中指定层的全部默认参数、及其被指定的参数</returns>
+    /// <returns><see cref="TorchUtilities.Layers.Sequential"/>中指定层的全部默认参数、及其被指定的参数</returns>
     [HttpGet("Layers/Default")]
     public async Task<JsonObject?> LayersDefault(string layerName)
     {
@@ -187,7 +187,7 @@ public partial class SequentialController
         };
     }
 
-    /// <returns>所有用户自定义的<see cref="Sequential"/>）</returns>
+    /// <returns>所有用户自定义的<see cref="TorchUtilities.Layers.Sequential"/>）</returns>
     [HttpGet("Layers/All")]
     public JsonArray LayersAll() =>
         new(_dbContext.SequentialRecord.ToArray().Select(t =>
@@ -197,7 +197,7 @@ public partial class SequentialController
                 ["value"] = t.Name
             }).ToArray());
 
-    /// <returns>所有基础的类型（继承于<see cref="Module"/>但不继承于<see cref="Sequential"/>）</returns>
+    /// <returns>所有基础的类型（继承于<see cref="Module"/>但不继承于<see cref="TorchUtilities.Layers.Sequential"/>）</returns>
     [HttpGet("Layers/New")]
     public JsonArray LayersNew() =>
         new(JsonUtilities.PresetTypes.Select(t =>
