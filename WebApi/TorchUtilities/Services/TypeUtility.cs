@@ -7,10 +7,11 @@ using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Services;
 
-public static class TypeUtilities
+public static class TypeUtility
 {
     public static Rect GetRect(this JsonNode ja) => new(ja[0]!.GetValue<long>(), ja[1]!.GetValue<long>());
     public static PaddingType GetPadding(this JsonNode je) => je is JsonArray ja ? ja.GetRect() : je.AsValue().GetValue<ushort>();
+    public static T Cast<T>(this object? o) => (T)(o ?? throw new InvalidCastException());
 
     public static JsonArray ToJson(this Rect r) => new(r.Item1, r.Item2);
     public static Rect RectParse(this string s)

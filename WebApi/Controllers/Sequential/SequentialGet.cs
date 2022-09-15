@@ -9,7 +9,7 @@ namespace WebApi.Controllers.Sequential;
 public partial class SequentialController
 {
     /// <returns><b>数据库</b>中全部的<see cref="SequentialRecord"/>及其元数据</returns>
-    [HttpGet("All")]
+    [HttpGet("Sequential/All")]
     public JsonArray All() =>
         new(_dbContext.SequentialRecord.ToArray()
             .Select((s, index)
@@ -26,7 +26,7 @@ public partial class SequentialController
     #region Find
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的全部元数据</returns>
-    [HttpGet("Find")]
+    [HttpGet("Sequential/Find")]
     public async Task<JsonObject?> Find(string sequentialName) =>
         await FindSequential(sequentialName) is not { } s
             ? null
@@ -40,7 +40,8 @@ public partial class SequentialController
             };
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的指定元数据</returns>
-    [HttpGet("Find/Metadata")]
+    [HttpGet("Sequential/Find/Metadata")]
+    [Obsolete("目前没用到")]
     public async Task<dynamic?> FindMetaData(string sequentialName, string metadataName) =>
         await FindSequential(sequentialName) is not { } s
             ? null
@@ -57,7 +58,7 @@ public partial class SequentialController
     #endregion
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>的参数</returns>
-    [HttpGet("Params")]
+    [HttpGet("Sequential/Params")]
     public async Task<JsonArray> Params(string sequentialName) =>
         await FindSequential(sequentialName) is not { } s
             ? new()
@@ -72,13 +73,23 @@ public partial class SequentialController
                         [nameof(ParamUtilities.Param.Default).ToCamel()] = param.Default.ToJsonNode()
                     }).ToArray());
 
+    /// <returns>所有用户自定义的<see cref="TorchUtilities.Layers.Sequential"/>）</returns>
+    [HttpGet("Sequential/List")]
+    public JsonArray LayersAll() =>
+        new(_dbContext.SequentialRecord.ToArray().Select(t =>
+            (JsonNode)new JsonObject
+            {
+                ["label"] = t.Name,
+                ["value"] = t.Name
+            }).ToArray());
+
     #region Layers
 
     /// <returns><b>数据库</b>中<see cref="SequentialRecord"/>包含的全部层及其被指定的参数</returns>
-    [HttpGet("Layers")]
+    [HttpGet("Layers/All")]
     public async Task<JsonArray> Layers(string sequentialName)
     {
-        var items = JsonNode.Parse((await FindSequential(sequentialName))?.ContentJson ?? "")?.AsArray()
+        var items = (await ParseContentJson(sequentialName))?
             .Select((je, index) =>
             {
                 var jo = je?.AsObject() ?? throw new NullReferenceException(nameof(je));
@@ -87,7 +98,7 @@ public partial class SequentialController
                 {
                     ["key"] = index,
                     ["name"] = name,
-                    ["type"] = name.GetLayerType(),
+                    ["type"] = name.GetLayerTypeString(),
                     ["containsParams"] = jo.GetOptParams(),
                     [nameof(Module.OutputChannels).ToCamel()] = jo.GetDynamicProperty(nameof(Module.OutputChannels)),
                     [nameof(Conv2d.KernelSize).ToCamel()] = jo.GetDynamicProperty(nameof(Conv2d.KernelSize)),
@@ -102,7 +113,7 @@ public partial class SequentialController
     [HttpGet("Layers/Edit")]
     public async Task<IEnumerable<JsonArray>?> LayersEdit(string sequentialName)
     {
-        var tasks = JsonNode.Parse((await FindSequential(sequentialName))?.ContentJson ?? "")?.AsArray()
+        var tasks = (await ParseContentJson(sequentialName))?
             .Select(async jn =>
             {
                 var layer = jn?.AsObject() ?? throw new NullReferenceException(nameof(jn));
@@ -110,12 +121,12 @@ public partial class SequentialController
                            throw new NullReferenceException(nameof(layer));
                 if (name switch
                 {
-                    nameof(Conv2d) => Conv2d.Deserialize(layer).ToJson(),
-                    nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToJson(),
-                    nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToJson(),
-                    nameof(Linear) => Linear.Deserialize(layer).ToJson(),
-                    nameof(Flatten) => Flatten.Deserialize(layer).ToJson(),
-                    nameof(ReLU) => ReLU.Deserialize(layer).ToJson(),
+                    nameof(Conv2d) => Conv2d.Deserialize(layer).ToFullJson(),
+                    nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToFullJson(),
+                    nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToFullJson(),
+                    nameof(Linear) => Linear.Deserialize(layer).ToFullJson(),
+                    nameof(Flatten) => Flatten.Deserialize(layer).ToFullJson(),
+                    nameof(ReLU) => ReLU.Deserialize(layer).ToFullJson(),
                     _ => null
                 } is { } ja)
                     return ja;
@@ -147,12 +158,12 @@ public partial class SequentialController
         JsonArray arr;
         if (layerName switch
         {
-            nameof(Conv2d) => new Conv2d().ToJson(),
-            nameof(AvgPool2d) => new AvgPool2d().ToJson(),
-            nameof(BatchNorm2d) => new BatchNorm2d().ToJson(),
-            nameof(Linear) => new Linear().ToJson(),
-            nameof(Flatten) => new Flatten().ToJson(),
-            nameof(ReLU) => new ReLU().ToJson(),
+            nameof(Conv2d) => new Conv2d().ToFullJson(),
+            nameof(AvgPool2d) => new AvgPool2d().ToFullJson(),
+            nameof(BatchNorm2d) => new BatchNorm2d().ToFullJson(),
+            nameof(Linear) => new Linear().ToFullJson(),
+            nameof(Flatten) => new Flatten().ToFullJson(),
+            nameof(ReLU) => new ReLU().ToFullJson(),
             _ => null
         } is { } ja)
             arr = ja;
@@ -177,7 +188,7 @@ public partial class SequentialController
             {
                 ["key"] = 0,
                 ["name"] = layerName,
-                ["type"] = layerName.GetLayerType(),
+                ["type"] = layerName.GetLayerTypeString(),
                 ["containsParams"] = null,
                 [nameof(Module.OutputChannels).ToCamel()] = null,
                 [nameof(Conv2d.KernelSize).ToCamel()] = null,
@@ -187,20 +198,11 @@ public partial class SequentialController
         };
     }
 
-    /// <returns>所有用户自定义的<see cref="TorchUtilities.Layers.Sequential"/>）</returns>
-    [HttpGet("Layers/All")]
-    public JsonArray LayersAll() =>
-        new(_dbContext.SequentialRecord.ToArray().Select(t =>
-            (JsonNode)new JsonObject
-            {
-                ["label"] = t.Name,
-                ["value"] = t.Name
-            }).ToArray());
 
     /// <returns>所有基础的类型（继承于<see cref="Module"/>但不继承于<see cref="TorchUtilities.Layers.Sequential"/>）</returns>
-    [HttpGet("Layers/New")]
+    [HttpGet("Layers/List")]
     public JsonArray LayersNew() =>
-        new(JsonUtilities.PresetTypes.Select(t =>
+        new(ModuleUtility.PresetTypes.Select(t =>
             (JsonNode)new JsonObject
             {
                 ["label"] = t,
@@ -209,4 +211,3 @@ public partial class SequentialController
 
     #endregion
 }
-

@@ -24,23 +24,9 @@ public class Sequential : Module, IEnumerable<Module>
     }
 
     [DeserializerIgnore]
-    public override long InputChannels
-    {
-        get => Modules is { Count: not 0 } ? Modules[0].InputChannels : -1;
-        set => Modules[0].InputChannels = Modules is { Count: not 0 } ? value : throw new NotSupportedException();
-    }
+    public override long InputChannels => Modules is { Count: not 0 } ? Modules[0].InputChannels : -1;
 
-    public sealed override Optional<long> OutputChannels
-    {
-        get => Modules is { Count: not 0 } ? Modules[^1].OutputChannels : InputChannels;
-        set
-        {
-            if (Modules is { Count: not 0 })
-                Modules[^1].OutputChannels = value;
-            else
-                InputChannels = value;
-        }
-    }
+    public sealed override Optional<long> OutputChannels => Modules is { Count: not 0 } ? Modules[^1].OutputChannels : InputChannels;
 
     [DeserializerIgnore]
     public List<Module> Modules { get; } = new();

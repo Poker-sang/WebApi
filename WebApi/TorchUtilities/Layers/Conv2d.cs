@@ -16,14 +16,14 @@ public partial class Conv2d : Module, IDeserialize<Conv2d>
         KernelSize = kernelSize;
     }
 
-    public sealed override Optional<long> OutputChannels { get; set; } = Optional<long>.Default;
-    public Optional<Rect> KernelSize { get; set; } = Optional<Rect>.Default;
-    public Optional<Rect> Stride { get; set; } = (1, 1);
-    public Optional<PaddingType> Padding { get; set; } = new PaddingType();
-    public Optional<Rect> Dilation { get; set; } = (1, 1);
-    public Optional<PaddingModes> PaddingMode { get; set; } = PaddingModes.Zeros;
-    public Optional<long> Groups { get; set; } = 1;
-    public Optional<bool> Bias { get; set; } = true;
+    public sealed override Optional<long> OutputChannels { get; } = Optional<long>.Default;
+    public Optional<Rect> KernelSize { get; } = Optional<Rect>.Default;
+    public Optional<Rect> Stride { get; } = (1, 1);
+    public Optional<PaddingType> Padding { get; } = new PaddingType();
+    public Optional<Rect> Dilation { get; } = (1, 1);
+    public Optional<PaddingModes> PaddingMode { get; } = PaddingModes.Zeros;
+    public Optional<long> Groups { get; } = 1;
+    public Optional<bool> Bias { get; } = true;
 
     public override torch.nn.Module ToTorch() =>
         ((PaddingType)Padding).GetPadding() is { } paddingType

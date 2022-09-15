@@ -10,13 +10,9 @@ public abstract class Module
     public virtual Module Last { get; set; } = null!;
 
     [DeserializerIgnore]
-    public virtual long InputChannels
-    {
-        get => Last.OutputChannels.TryGetValue;
-        set => Last.OutputChannels = value;
-    }
+    public virtual long InputChannels => Last.OutputChannels.GetValue();
 
-    public virtual Optional<long> OutputChannels { get; set; }
+    public virtual Optional<long> OutputChannels { get; } = Optional<long>.Default;
 
     public abstract torch.nn.Module ToTorch();
 }

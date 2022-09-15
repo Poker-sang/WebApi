@@ -9,9 +9,9 @@ namespace WebApi.TorchUtilities.Layers;
 public partial class Linear : Module, IDeserialize<Linear>
 {
     public Linear() { }
-    public Optional<long> InputSize { get; set; } = Optional<long>.Default;
-    public Optional<long> OutputSize { get; set; } = Optional<long>.Default;
-    public Optional<bool> Bias { get; set; } = true;
+    public Optional<long> InputSize { get; } = Optional<long>.Default;
+    public Optional<long> OutputSize { get; } = Optional<long>.Default;
+    public Optional<bool> Bias { get; } = true;
     [DeserializerIgnore]
     public sealed override long InputChannels => 1;
     public sealed override Optional<long> OutputChannels => 1;

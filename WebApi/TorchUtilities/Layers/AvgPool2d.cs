@@ -11,15 +11,11 @@ public partial class AvgPool2d : Module, IDeserialize<AvgPool2d>
     public AvgPool2d() { }
 
     [DeserializerIgnore]
-    public override Optional<long> OutputChannels
-    {
-        get => Last.OutputChannels;
-        set => Last.OutputChannels = value;
-    }
+    public override Optional<long> OutputChannels => Last.OutputChannels;
 
-    public Optional<Rect> KernelSize { get; set; } = Optional<Rect>.Default;
+    public Optional<Rect> KernelSize { get; } = Optional<Rect>.Default;
 
-    public Optional<Rect> Stride { get; set; } = (1, 1);
+    public Optional<Rect> Stride { get; } = (1, 1);
 
     public AvgPool2d(Rect kernelSize) => KernelSize = kernelSize;
 

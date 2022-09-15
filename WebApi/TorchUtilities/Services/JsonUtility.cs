@@ -1,16 +1,18 @@
-﻿using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using WebApi.TorchUtilities.Layers;
 
 namespace WebApi.TorchUtilities.Services;
 
-public static class JsonUtilities
+public static class JsonUtility
 {
-    public static HashSet<string> PresetTypes { get; } = typeof(Module).Assembly.GetTypes().Where(t =>
-            t.IsSubclassOf(typeof(Module)) && !t.IsAssignableFrom(typeof(Sequential)) && !t.IsAssignableFrom(typeof(InputLayer)))
-        .Select(t => t.Name).ToHashSet();
 
-    public static string GetLayerType(this string typeName) => PresetTypes.Contains(typeName) ? "builtin" : "sequential";
+    public static string GetLayerTypeString(this string typeName) =>
+        typeName.GetLayerType() switch
+        {
+            ModuleUtility.PresetType.Builtin => nameof(ModuleUtility.PresetType.Builtin).ToCamel(),
+            ModuleUtility.PresetType.Sequential => nameof(ModuleUtility.PresetType.Sequential).ToCamel(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
     public static dynamic? GetDynamicProperty(this JsonObject je, string property)
     {

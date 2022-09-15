@@ -35,16 +35,24 @@ partial class {name} : IDeserialize<{name}>
             switch (key)
             {{
 ");
-        var deserializeEndAndToJsonBegin = new StringBuilder(@$"{Spacing(3)}}}
+        var deserializeEndAndToFullJsonBegin = new StringBuilder(@$"{Spacing(3)}}}
         return result;
     }}
 
-    public JsonArray ToJson() =>
+    public JsonArray ToFullJson() =>
         new()
         {{
 ");
-        const string toJsonEndAndClassEnd = $@"
+        var toFullJsonEndAndToJsonBegin = new StringBuilder(@$"
         }};
+
+    public JsonArray ToJson() 
+    {{
+        var ja = new JsonArray();
+");
+        const string toJsonEndAndClassEnd = $@"
+        return ja;
+    }}
 }}";
 
         var dict = typeDeclaration.Members
@@ -60,13 +68,16 @@ partial class {name} : IDeserialize<{name}>
             namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
             var declaration = dict[property.Name];
             _ = classBeginAndDeserializeBegin.AppendLine(PropertyDeserialize(property, declaration));
-            _ = deserializeEndAndToJsonBegin.AppendLine(PropertyToJson(property));
+            _ = deserializeEndAndToFullJsonBegin.AppendLine(PropertyToJsonFull(property));
+            _ = toFullJsonEndAndToJsonBegin.AppendLine(PropertyToJson(property));
         }
 
-        deserializeEndAndToJsonBegin = deserializeEndAndToJsonBegin.Remove(deserializeEndAndToJsonBegin.Length - 3, 3);
+        deserializeEndAndToFullJsonBegin = deserializeEndAndToFullJsonBegin.Remove(deserializeEndAndToFullJsonBegin.Length - 3, 3);
+        toFullJsonEndAndToJsonBegin = toFullJsonEndAndToJsonBegin.Remove(toFullJsonEndAndToJsonBegin.Length - 2, 2);
         return namespaces.GenerateFileHeader()
             .Append(classBeginAndDeserializeBegin)
-            .Append(deserializeEndAndToJsonBegin)
+            .Append(deserializeEndAndToFullJsonBegin)
+            .Append(toFullJsonEndAndToJsonBegin)
             .AppendLine(toJsonEndAndClassEnd)
             .ToString();
     }
@@ -78,7 +89,7 @@ partial class {name} : IDeserialize<{name}>
         if (type.EndsWith("?"))
             type = type.Substring(0, type.Length - 1);
 
-        return $"{Spacing(4)}case nameof({name}): result.{name} = {type}.FromJson(value!); break;";
+        return $"{Spacing(4)}case nameof({name}): result.{name}.TrySet({type}.FromJson(value!)); break;";
     }
 
     private static readonly Dictionary<string, string> _presetTypes = new()
@@ -98,7 +109,10 @@ partial class {name} : IDeserialize<{name}>
         ["Padding"] = "Padding"
     };
 
-    private static string PropertyToJson(IPropertySymbol property)
-        => $@"{Spacing(3)}{property.Name}.ToJson(nameof({property.Name})),";
+    private static string PropertyToJsonFull(IPropertySymbol property)
+        => $"{Spacing(3)}{property.Name}.ToJson(nameof({property.Name})),";
 
+    private static string PropertyToJson(IPropertySymbol property)
+        => $@"{Spacing(2)}if ({property.Name}.Changed)
+            {property.Name}.ToJson(nameof({property.Name}));";
 }
