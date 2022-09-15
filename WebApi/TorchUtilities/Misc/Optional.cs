@@ -51,7 +51,7 @@ public static class Optional
             _ => throw new NotSupportedException()
         });
 
-    public static JsonObject ToJson(this Optional<object> o, Type t, string callerName)
+    public static JsonObject ToWebJson(this Optional<object> o, Type t, string callerName)
     {
         var isBinding = false;
         var bindingValue = (JsonNode?)null;
@@ -61,43 +61,58 @@ public static class Optional
             bindingValue = i;
         }
 
-        try
+        switch (0)
         {
-            switch (0)
-            {
-                case 0 when t.IsPrimitive:
-                case 0 when t.IsEnum:
-                    return new()
-                    {
-                        ["name"] = callerName,
-                        ["type"] = t.Name,
-                        ["isBinding"] = isBinding,
-                        ["value"] = bindingValue ?? JsonValue.Create(o.GetValue())
-                    };
-                case 0 when t == typeof(Rect):
-                    return new()
-                    {
-                        ["name"] = callerName,
-                        ["type"] = nameof(Rect),
-                        ["isBinding"] = isBinding,
-                        ["value"] = bindingValue ?? new JsonArray(((Rect)o.GetValue()).Item1, ((Rect)o.GetValue()).Item2)
-                    };
-                case 0 when t == typeof(PaddingType):
-                    return new()
-                    {
-                        ["name"] = callerName,
-                        ["type"] = nameof(PaddingType),
-                        ["isBinding"] = isBinding,
-                        ["value"] = bindingValue ?? ((PaddingType)o.GetValue()).ToJson()
-                    };
-                default:
-                    throw new NotSupportedException();
-            }
+            case 0 when t.IsPrimitive:
+            case 0 when t.IsEnum:
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = t.Name,
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? JsonValue.Create(o.GetValue())
+                };
+            case 0 when t == typeof(Rect):
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = nameof(Rect),
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? new JsonArray(((Rect)o.GetValue()).Item1, ((Rect)o.GetValue()).Item2)
+                };
+            case 0 when t == typeof(PaddingType):
+                return new()
+                {
+                    ["name"] = callerName,
+                    ["type"] = nameof(PaddingType),
+                    ["isBinding"] = isBinding,
+                    ["value"] = bindingValue ?? ((PaddingType)o.GetValue()).ToJson()
+                };
+            default:
+                throw new NotSupportedException();
         }
-        catch (Exception e)
+    }
+
+    public static JsonNode ToSqlJson(this Optional<object> o, Type t)
+    {
+        if (o.TryGetBinding() is { } i)
         {
-            Console.WriteLine(e);
-            throw;
+            if (i < -1)
+                throw new InvalidDataException();
+            return JsonValue.Create(i is -1 ? "*" : $"${i}")!;
+        }
+
+        switch (0)
+        {
+            case 0 when t.IsPrimitive:
+            case 0 when t.IsEnum:
+                return JsonValue.Create(o.GetValue())!;
+            case 0 when t == typeof(Rect):
+                return new JsonArray(((Rect)o.GetValue()).Item1, ((Rect)o.GetValue()).Item2);
+            case 0 when t == typeof(PaddingType):
+                return ((PaddingType)o.GetValue()).ToJson();
+            default:
+                throw new NotSupportedException();
         }
     }
 }
@@ -184,7 +199,8 @@ public class Optional<T> where T : notnull
                 _ => throw new NotSupportedException(typeof(T).FullName)
             });
 
-    public JsonObject ToJson(string callerName) => Optional.ToJson(this, typeof(T), callerName);
+    public JsonObject ToWebJson(string callerName) => Optional.ToWebJson(this, typeof(T), callerName);
+    public JsonNode ToSqlJson() => Optional.ToSqlJson(this, typeof(T));
 
     public override bool Equals(object? obj) => obj is not null && Equals(obj);
 

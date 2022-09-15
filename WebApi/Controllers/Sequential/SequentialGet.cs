@@ -121,12 +121,12 @@ public partial class SequentialController
                            throw new NullReferenceException(nameof(layer));
                 if (name switch
                 {
-                    nameof(Conv2d) => Conv2d.Deserialize(layer).ToFullJson(),
-                    nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToFullJson(),
-                    nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToFullJson(),
-                    nameof(Linear) => Linear.Deserialize(layer).ToFullJson(),
-                    nameof(Flatten) => Flatten.Deserialize(layer).ToFullJson(),
-                    nameof(ReLU) => ReLU.Deserialize(layer).ToFullJson(),
+                    nameof(Conv2d) => Conv2d.Deserialize(layer).ToWebJson(),
+                    nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToWebJson(),
+                    nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToWebJson(),
+                    nameof(Linear) => Linear.Deserialize(layer).ToWebJson(),
+                    nameof(Flatten) => Flatten.Deserialize(layer).ToWebJson(),
+                    nameof(ReLU) => ReLU.Deserialize(layer).ToWebJson(),
                     _ => null
                 } is { } ja)
                     return ja;
@@ -146,7 +146,7 @@ public partial class SequentialController
                         p[key] = (type, Optional.FromJson(type, value));
 
                 return new(p.Select(pair =>
-                    (JsonNode)((Optional<object>)pair.Value.Value!).ToJson(pair.Value.Type, pair.Key)).ToArray());
+                    (JsonNode)((Optional<object>)pair.Value.Value!).ToWebJson(pair.Value.Type, pair.Key)).ToArray());
             });
         return tasks is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(tasks);
     }
@@ -158,12 +158,12 @@ public partial class SequentialController
         JsonArray arr;
         if (layerName switch
         {
-            nameof(Conv2d) => new Conv2d().ToFullJson(),
-            nameof(AvgPool2d) => new AvgPool2d().ToFullJson(),
-            nameof(BatchNorm2d) => new BatchNorm2d().ToFullJson(),
-            nameof(Linear) => new Linear().ToFullJson(),
-            nameof(Flatten) => new Flatten().ToFullJson(),
-            nameof(ReLU) => new ReLU().ToFullJson(),
+            nameof(Conv2d) => new Conv2d().ToWebJson(),
+            nameof(AvgPool2d) => new AvgPool2d().ToWebJson(),
+            nameof(BatchNorm2d) => new BatchNorm2d().ToWebJson(),
+            nameof(Linear) => new Linear().ToWebJson(),
+            nameof(Flatten) => new Flatten().ToWebJson(),
+            nameof(ReLU) => new ReLU().ToWebJson(),
             _ => null
         } is { } ja)
             arr = ja;
@@ -178,7 +178,7 @@ public partial class SequentialController
                     : new KeyValuePair<string, (Type, object)>(t.Name,
                         (t.Type, Optional<object>.Default))));
 
-            arr = new(p.Select(pair => (JsonNode)((Optional<object>)pair.Value.Value).ToJson(pair.Value.Type, pair.Key))
+            arr = new(p.Select(pair => (JsonNode)((Optional<object>)pair.Value.Value).ToWebJson(pair.Value.Type, pair.Key))
                 .ToArray());
         }
 

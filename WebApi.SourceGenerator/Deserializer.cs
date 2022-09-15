@@ -39,19 +39,19 @@ partial class {name} : IDeserialize<{name}>
         return result;
     }}
 
-    public JsonArray ToFullJson() =>
+    public JsonArray ToWebJson() =>
         new()
         {{
 ");
         var toFullJsonEndAndToJsonBegin = new StringBuilder(@$"
         }};
 
-    public JsonArray ToJson() 
+    public JsonObject ToSqlJson() 
     {{
-        var ja = new JsonArray();
+        var jo = new JsonObject {{ [""Name""] = nameof({name}) }};
 ");
         const string toJsonEndAndClassEnd = $@"
-        return ja;
+        return jo;
     }}
 }}";
 
@@ -110,9 +110,9 @@ partial class {name} : IDeserialize<{name}>
     };
 
     private static string PropertyToJsonFull(IPropertySymbol property)
-        => $"{Spacing(3)}{property.Name}.ToJson(nameof({property.Name})),";
+        => $"{Spacing(3)}{property.Name}.ToWebJson(nameof({property.Name})),";
 
     private static string PropertyToJson(IPropertySymbol property)
         => $@"{Spacing(2)}if ({property.Name}.Changed)
-            {property.Name}.ToJson(nameof({property.Name}));";
+            jo.Add(nameof({property.Name}), {property.Name}.ToSqlJson(nameof({property.Name})));";
 }

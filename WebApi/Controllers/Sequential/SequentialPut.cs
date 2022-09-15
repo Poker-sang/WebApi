@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
 using WebApi.Database;
-using AvgPool2d = WebApi.TorchUtilities.Layers.AvgPool2d;
-using BatchNorm2d = WebApi.TorchUtilities.Layers.BatchNorm2d;
-using Conv2d = WebApi.TorchUtilities.Layers.Conv2d;
-using Flatten = WebApi.TorchUtilities.Layers.Flatten;
-using Linear = WebApi.TorchUtilities.Layers.Linear;
-using ReLU = WebApi.TorchUtilities.Layers.ReLU;
+using WebApi.TorchUtilities.Layers;
 
 namespace WebApi.Controllers.Sequential;
 
@@ -40,18 +35,15 @@ public partial class SequentialController
     {
         if (type switch
             {
-                nameof(Conv2d) => Conv2d.Deserialize(layer).ToJson(),
-                nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToJson(),
-                nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToJson(),
-                nameof(Linear) => Linear.Deserialize(layer).ToJson(),
-                nameof(Flatten) => Flatten.Deserialize(layer).ToJson(),
-                nameof(ReLU) => ReLU.Deserialize(layer).ToJson(),
+                nameof(Conv2d) => Conv2d.Deserialize(layer).ToSqlJson(),
+                nameof(AvgPool2d) => AvgPool2d.Deserialize(layer).ToSqlJson(),
+                nameof(BatchNorm2d) => BatchNorm2d.Deserialize(layer).ToSqlJson(),
+                nameof(Linear) => Linear.Deserialize(layer).ToSqlJson(),
+                nameof(Flatten) => Flatten.Deserialize(layer).ToSqlJson(),
+                nameof(ReLU) => ReLU.Deserialize(layer).ToSqlJson(),
                 _ => null
             } is { } ja)
             return null;
-
-
-
 
         return null;
     }
