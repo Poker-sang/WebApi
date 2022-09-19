@@ -7,6 +7,13 @@ namespace WebApi.TorchUtilities.Misc;
 
 public static class Optional
 {
+    /// <summary>
+    /// Json转指定类型的<see cref="Optional{T}"/>
+    /// </summary>
+    /// <param name="t">类型</param>
+    /// <param name="jn">Json</param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"/>
     public static Optional<dynamic> FromJson(Type t, JsonNode jn) =>
         jn.TrySplitOptParam(out var rst)
             ? Optional<dynamic>.FromBinding(rst)
@@ -27,27 +34,27 @@ public static class Optional
                 0 when t == typeof(Rect) => jn.GetRect(),
                 0 when t == typeof(PaddingType) => jn.GetPadding(),
                 0 when t.IsEnum => jn.GetValue<int>(),
-                _ => throw new NotSupportedException()
+                _ => throw new NotSupportedException($"{t.FullName} Not Supported")
             });
 
-    public static Optional<dynamic> FromJson(Type t, object o) =>
-        Optional<dynamic>.FromValue(0 switch
+    public static Optional<dynamic> FromValue(Type t, object o)
+        => Optional<dynamic>.FromValue(o switch
         {
-            0 when t == typeof(sbyte) => (sbyte)o,
-            0 when t == typeof(byte) => (byte)o,
-            0 when t == typeof(short) => (short)o,
-            0 when t == typeof(ushort) => (ushort)o,
-            0 when t == typeof(int) => (int)o,
-            0 when t == typeof(uint) => (uint)o,
-            0 when t == typeof(long) => (long)o,
-            0 when t == typeof(ulong) => (ulong)o,
-            0 when t == typeof(float) => (float)o,
-            0 when t == typeof(double) => (double)o,
-            0 when t == typeof(decimal) => (decimal)o,
-            0 when t == typeof(bool) => (bool)o,
-            0 when t == typeof(Rect) => (Rect)o,
-            0 when t == typeof(PaddingType) => (PaddingType)o,
-            0 when t.IsEnum => (int)o,
+            sbyte v => v,
+            byte v => v,
+            short v => v,
+            ushort v => v,
+            int v => v,
+            uint v => v,
+            long v => v,
+            ulong v => v,
+            float v => v,
+            double v => v,
+            decimal v => v,
+            bool v => v,
+            Rect v => v,
+            PaddingType v => v,
+            Enum => (int)o,
             _ => throw new NotSupportedException()
         });
 
@@ -63,6 +70,7 @@ public static class Optional
 
         switch (0)
         {
+
             case 0 when t.IsPrimitive:
             case 0 when t.IsEnum:
                 return new()
@@ -89,7 +97,7 @@ public static class Optional
                     ["value"] = bindingValue ?? ((PaddingType)o.GetValue()).ToJson()
                 };
             default:
-                throw new NotSupportedException();
+                throw new NotSupportedException($"{t.FullName} Not Supported");
         }
     }
 
@@ -160,13 +168,14 @@ public class Optional<T> where T : notnull
     }
 
     public T GetValue() => ValueType ? _value : throw new NullReferenceException();
+    public T? TryGetValue() => _value;
     public int GetBinding() => !ValueType ? _binding.Value : throw new NullReferenceException();
     public int? TryGetBinding() => _binding;
 
     private static void RestrictGenerics()
     {
         if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Optional<>))
-            throw new InvalidDataException($"Invalid Generic {typeof(T)}");
+            throw new InvalidDataException($"Invalid Generic {typeof(T).FullName}");
     }
 
     private Optional() => RestrictGenerics();
@@ -186,17 +195,28 @@ public class Optional<T> where T : notnull
     public static implicit operator Optional<T>(T v) => FromValue(v);
     public static implicit operator T(Optional<T> v) => v.GetValue();
 
+    /// <inheritdoc cref="Optional.FromJson"/>
     public static Optional<T> FromJson(JsonNode jn) =>
         jn.TrySplitOptParam(out var rst)
             ? FromBinding(rst)
-            : FromValue(0 switch
+            : FromValue(default(T) switch
             {
-                0 when typeof(T).IsAssignableTo(typeof(INumber<>)) => jn.GetValue<T>(),
-                0 when typeof(T) == typeof(bool) => jn.GetValue<T>(),
-                0 when typeof(T) == typeof(Rect) => jn.GetRect().Cast<T>(),
-                0 when typeof(T) == typeof(PaddingType) => jn.GetPadding().Cast<T>(),
-                0 when typeof(T).IsEnum => jn.GetValue<int>().Cast<T>(),
-                _ => throw new NotSupportedException(typeof(T).FullName)
+                sbyte => jn.GetValue<T>(),
+                byte => jn.GetValue<T>(),
+                short => jn.GetValue<T>(),
+                ushort => jn.GetValue<T>(),
+                int => jn.GetValue<T>(),
+                uint => jn.GetValue<T>(),
+                long => jn.GetValue<T>(),
+                ulong => jn.GetValue<T>(),
+                float => jn.GetValue<T>(),
+                double => jn.GetValue<T>(),
+                decimal => jn.GetValue<T>(),
+                bool => jn.GetValue<T>(),
+                Rect => jn.GetRect().Cast<T>(),
+                PaddingType => jn.GetPadding().Cast<T>(),
+                Enum => jn.GetValue<int>().Cast<T>(),
+                _ => throw new NotSupportedException($"{typeof(T).FullName} Not Supported")
             });
 
     public JsonObject ToWebJson(string callerName) => Optional.ToWebJson(this, typeof(T), callerName);

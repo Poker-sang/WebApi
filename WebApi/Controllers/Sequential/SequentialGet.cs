@@ -100,9 +100,9 @@ public partial class SequentialController
                     ["name"] = name,
                     ["type"] = name.GetLayerTypeString(),
                     ["containsParams"] = jo.GetOptParams(),
-                    [nameof(Module.OutputChannels).ToCamel()] = jo.GetDynamicProperty(nameof(Module.OutputChannels)),
-                    [nameof(Conv2d.KernelSize).ToCamel()] = jo.GetDynamicProperty(nameof(Conv2d.KernelSize)),
-                    [nameof(Conv2d.Stride).ToCamel()] = jo.GetDynamicProperty(nameof(Conv2d.Stride))
+                    [nameof(Module.OutputChannels).ToCamel()] = jo.GetDynamicProperty<long>(nameof(Module.OutputChannels)),
+                    [nameof(Conv2d.KernelSize).ToCamel()] = jo.GetDynamicProperty<Rect>(nameof(Conv2d.KernelSize)),
+                    [nameof(Conv2d.Stride).ToCamel()] = jo.GetDynamicProperty<Rect>(nameof(Conv2d.Stride))
                 };
             })?.ToArray();
 
@@ -143,7 +143,7 @@ public partial class SequentialController
                     if (value is null)
                         throw new NullReferenceException(nameof(value));
                     else if (value.GetType().GetGenericTypeDefinition() != typeof(Optional<>))
-                        p[key] = (type, Optional.FromJson(type, value));
+                        p[key] = (type, Optional.FromValue(type, value));
 
                 return new(p.Select(pair =>
                     (JsonNode)((Optional<object>)pair.Value.Value!).ToWebJson(pair.Value.Type, pair.Key)).ToArray());
@@ -174,7 +174,7 @@ public partial class SequentialController
 
             var p = new Dictionary<string, (Type Type, object Value)>(s.GetParams()
                 .Select(t => t.Default is not null && t.Type.GetGenericTypeDefinition() != typeof(Optional<>)
-                    ? new(t.Name, (t.Type, Optional.FromJson(t.Type, t.Default)))
+                    ? new(t.Name, (t.Type, Optional.FromValue(t.Type, t.Default)))
                     : new KeyValuePair<string, (Type, object)>(t.Name,
                         (t.Type, Optional<object>.Default))));
 

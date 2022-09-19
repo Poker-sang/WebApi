@@ -114,5 +114,5 @@ partial class {name} : IDeserialize<{name}>
 
     private static string PropertyToJson(IPropertySymbol property)
         => $@"{Spacing(2)}if ({property.Name}.Changed)
-            jo.Add(nameof({property.Name}), {property.Name}.ToSqlJson(nameof({property.Name})));";
+            jo.Add(nameof({property.Name}), {property.Name}.ToSqlJson());";
 }
