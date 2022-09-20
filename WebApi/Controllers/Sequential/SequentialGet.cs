@@ -137,16 +137,16 @@ public partial class SequentialController
                 var p = new Dictionary<string, (Type Type, object? Value)>(s2.GetParams()
                     .Select(t => new KeyValuePair<string, (Type, object?)>(t.Name, (t.Type, t.Default))));
                 foreach (var jp in layer.Where(jp => p.ContainsKey(jp.Key)))
-                    p[jp.Key] = (p[jp.Key].Type, Optional.FromJson(p[jp.Key].Type, jp.Value!));
+                    p[jp.Key] = (p[jp.Key].Type, OptionalDynamic.FromJson(p[jp.Key].Type, jp.Value!));
 
                 foreach (var (key, (type, value)) in p)
                     if (value is null)
                         throw new NullReferenceException(nameof(value));
-                    else if (value.GetType().GetGenericTypeDefinition() != typeof(Optional<>))
-                        p[key] = (type, Optional.FromValue(type, value));
+                    else if (OptionalBase.IsValidType(value.GetType()))
+                        p[key] = (type, OptionalDynamic.FromValue(value));
 
                 return new(p.Select(pair =>
-                    (JsonNode)((Optional<object>)pair.Value.Value!).ToWebJson(pair.Value.Type, pair.Key)).ToArray());
+                    (JsonNode)((OptionalDynamic)pair.Value.Value!).ToWebJson(pair.Value.Type, pair.Key)).ToArray());
             });
         return tasks is null ? null : (IEnumerable<JsonArray>)await Task.WhenAll(tasks);
     }
@@ -173,12 +173,12 @@ public partial class SequentialController
                 return null;
 
             var p = new Dictionary<string, (Type Type, object Value)>(s.GetParams()
-                .Select(t => t.Default is not null && t.Type.GetGenericTypeDefinition() != typeof(Optional<>)
-                    ? new(t.Name, (t.Type, Optional.FromValue(t.Type, t.Default)))
+                .Select(t => t.Default is not null && t.Type.IsSubclassOf(typeof(OptionalBase))
+                    ? new(t.Name, (t.Type, OptionalDynamic.FromValue(t.Default)))
                     : new KeyValuePair<string, (Type, object)>(t.Name,
-                        (t.Type, Optional<object>.Default))));
+                        (t.Type, OptionalDynamic.Default(t.Type)))));
 
-            arr = new(p.Select(pair => (JsonNode)((Optional<object>)pair.Value.Value).ToWebJson(pair.Value.Type, pair.Key))
+            arr = new(p.Select(pair => (JsonNode)((OptionalDynamic)pair.Value.Value).ToWebJson(pair.Value.Type, pair.Key))
                 .ToArray());
         }
 

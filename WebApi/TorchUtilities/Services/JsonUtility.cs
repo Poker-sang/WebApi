@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Nodes;
-using WebApi.TorchUtilities.Layers;
 using WebApi.TorchUtilities.Misc;
 
 namespace WebApi.TorchUtilities.Services;
@@ -22,12 +21,14 @@ public static class JsonUtility
     /// <param name="property"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-    public static JsonNode? GetDynamicProperty<T>(this JsonObject je, string property) where T : notnull 
-        => je.TryGetPropertyValue(property, out var result) && result is not null ? Optional<T>.FromJson(result).ToSqlJson() : null;
+    public static JsonNode? GetDynamicProperty<T>(this JsonObject je, string property) where T : struct =>
+        je.TryGetPropertyValue(property, out var result) && result is not null
+            ? Optional<T>.FromJson(result).ToSqlJson()
+            : null;
 
     /// <summary>
     /// 从<paramref name="jn"/>获取可选参数值
-    /// <br/><inheritdoc cref="Misc.Optional{T}._binding"/>
+    /// <br/><inheritdoc cref="Optional{T}._binding"/>
     /// </summary>
     /// <param name="jn">提供<see cref="JsonValue"/>，<see cref="string"/>类型的<see cref="JsonNode"/></param>
     /// <param name="v">默认-2</param>

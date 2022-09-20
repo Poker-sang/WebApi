@@ -13,7 +13,7 @@ public partial class Flatten : Module, IDeserialize<Flatten>
 
     [DeserializerIgnore]
     public override Optional<long> OutputChannels =>
-        StartDimension.GetValue() is 1 && EndDimension.GetValue() is -1 or 3
+        StartDimension.Value is 1 && EndDimension.Value is -1 or 3
             ? 0
             : throw new InvalidDataException();
 
